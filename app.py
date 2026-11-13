@@ -23,7 +23,7 @@ try:
   bin_str = get_base64_of_bin_file("fabrica.jpg")
   background_css = f"""
     .stApp {{
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), 
                     url("data:image/jpeg;base64,{bin_str}");
         background-size: cover;
         background-position: center;
@@ -37,7 +37,7 @@ except:
     }}
     """
 
-# Estilos CSS precisos
+# Estilos CSS robustos para un manejo de colores impecable en cualquier fondo
 st.markdown(
     f"""
     <style>
@@ -49,7 +49,7 @@ st.markdown(
     
     {background_css}
     
-    /* Estilizar el formulario nativo como la tarjeta blanca centrada y compacta */
+    /* Estilizar el formulario nativo de login */
     [data-testid="stForm"] {{
         background: rgba(255, 255, 255, 0.98);
         padding: 2.2rem;
@@ -93,7 +93,6 @@ st.markdown(
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     }}
     
-    /* Estilo exclusivo para el botón de envío del formulario (INICIAR SESIÓN) */
     [data-testid="stFormSubmitButton"] button {{
         background-color: #F40009 !important;
         color: white !important;
@@ -111,7 +110,6 @@ st.markdown(
         box-shadow: 0 4px 12px rgba(244, 0, 9, 0.4);
     }}
 
-    /* Estilo para el botón de ver/ocultar contraseña (icono del ojo) en tono gris/negro y pequeño */
     [data-testid="stTextInput"] button {{
         background-color: transparent !important;
         color: #555555 !important;
@@ -120,6 +118,20 @@ st.markdown(
     
     [data-testid="stTextInput"] button svg {{
         fill: #555555 !important;
+    }}
+
+    /* Tarjetas contenedoras para el panel principal (garantizan legibilidad total en cualquier fondo) */
+    .dashboard-card {{
+        background: rgba(20, 20, 20, 0.85);
+        padding: 2.2rem;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border-left: 6px solid #F40009;
+        margin-bottom: 1.5rem;
+    }}
+
+    .dashboard-card h1, .dashboard-card h2, .dashboard-card h3, .dashboard-card p {{
+        color: #FFFFFF !important;
     }}
     </style>
     """,
@@ -146,7 +158,6 @@ if not st.session_state.autenticado:
         unsafe_allow_html=True,
     )
 
-    # Usamos st.form para agrupar impecablemente los elementos y el botón centrado
     with st.form("login_form"):
       st.markdown(
           '<div style="text-align: center;"><span'
@@ -199,14 +210,20 @@ else:
       st.session_state.autenticado = False
       st.rerun()
 
+  # Contenido envuelto en tarjetas profesionales para garantizar alto contraste y legibilidad absoluta
   if menu == "🏠 Inicio / Resumen":
-    st.title("🏭 Planta Coca-Cola FEMSA - Barranquilla")
-    st.subheader("Sistema de Soporte a Decisiones (DSS) para Portafolio CAPEX")
     st.markdown(
         """
-        Bienvenido al sistema gerencial de optimización y priorización de proyectos de inversión. 
-        Utilice el menú lateral para navegar entre el registro de iniciativas, la ejecución del motor de optimización y la generación de reportes para el brief corporativo.
-        """
+        <div class="dashboard-card">
+            <h1>🏭 Planta Coca-Cola FEMSA - Barranquilla</h1>
+            <h3>Sistema de Soporte a Decisiones (DSS) para Portafolio CAPEX</h3>
+            <p style="margin-top: 1rem; line-height: 1.6;">
+                Bienvenido al sistema gerencial de optimización y priorización de proyectos de inversión. 
+                Utilice el menú lateral para navegar entre el registro de iniciativas, la ejecución del motor de optimización y la generación de reportes para el brief corporativo.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     col1, col2, col3 = st.columns(3)
@@ -222,22 +239,34 @@ else:
       )
 
   elif menu == "📋 Registro de Proyectos":
-    st.title("📋 Registro y Gestión de Proyectos CAPEX")
-    st.info(
-        "Aquí crearemos el formulario para registrar los proyectos con sus"
-        " costos, puntajes AHP y restricciones."
+    st.markdown(
+        """
+        <div class="dashboard-card">
+            <h2>📋 Registro y Gestión de Proyectos CAPEX</h2>
+            <p style="margin-top: 1rem;">Aquí crearemos el formulario para registrar los proyectos con sus costos, puntajes AHP y restricciones.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
   elif menu == "⚙️ Optimización Multiperiodo":
-    st.title("⚙️ Motor de Optimización Multiperiodo (MILP)")
-    st.info(
-        "Aquí implementaremos el motor matemático de selección de portafolio y"
-        " visualización de cronogramas."
+    st.markdown(
+        """
+        <div class="dashboard-card">
+            <h2>⚙️ Motor de Optimización Multiperiodo (MILP)</h2>
+            <p style="margin-top: 1rem;">Aquí implementaremos el motor matemático de selección de portafolio y visualización de cronogramas.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
   elif menu == "📊 Reportes & Brief":
-    st.title("📊 Generación de Reportes y Brief en Excel")
-    st.info(
-        "Aquí colocaremos el botón de descarga en formato Excel para el brief"
-        " corporativo."
+    st.markdown(
+        """
+        <div class="dashboard-card">
+            <h2>📊 Generación de Reportes y Brief en Excel</h2>
+            <p style="margin-top: 1rem;">Aquí colocaremos el botón de descarga en formato Excel para el brief corporativo.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
