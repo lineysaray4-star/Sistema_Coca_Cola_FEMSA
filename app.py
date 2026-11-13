@@ -37,7 +37,7 @@ except:
     }}
     """
 
-# Estilos CSS precisos utilizando el contenedor del formulario
+# Estilos CSS precisos
 st.markdown(
     f"""
     <style>
@@ -93,8 +93,8 @@ st.markdown(
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     }}
     
-    /* Centrar perfectamente el botón de envío dentro de la tarjeta */
-    [data-testid="stForm"] button {{
+    /* Estilo exclusivo para el botón de envío del formulario (INICIAR SESIÓN) */
+    [data-testid="stFormSubmitButton"] button {{
         background-color: #F40009 !important;
         color: white !important;
         font-weight: 800 !important;
@@ -106,9 +106,20 @@ st.markdown(
         border: none !important;
     }}
     
-    [data-testid="stForm"] button:hover {{
+    [data-testid="stFormSubmitButton"] button:hover {{
         background-color: #c50007 !important;
         box-shadow: 0 4px 12px rgba(244, 0, 9, 0.4);
+    }}
+
+    /* Estilo para el botón de ver/ocultar contraseña (icono del ojo) en tono gris/negro y pequeño */
+    [data-testid="stTextInput"] button {{
+        background-color: transparent !important;
+        color: #555555 !important;
+        border: none !important;
+    }}
+    
+    [data-testid="stTextInput"] button svg {{
+        fill: #555555 !important;
     }}
     </style>
     """,
