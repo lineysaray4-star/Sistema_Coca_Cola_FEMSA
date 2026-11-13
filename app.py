@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Estilos CSS corporativos con máxima legibilidad
+# Estilos CSS corporativos con fondo de fábrica y textos blancos
 st.markdown(
     """
     <style>
@@ -18,57 +18,60 @@ st.markdown(
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
     
-    /* Fondo con imagen de fábrica real de Coca-Cola y tono oscuro suave */
+    /* Fondo con imagen de línea de envasado industrial de Coca-Cola y tono oscuro suave */
     .stApp {
-        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), 
-                    url('https://images.unsplash.com/photo-1629967341764-055d7f4d1002?auto=format&fit=crop&w=1920&q=80');
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                    url('https://images.unsplash.com/photo-1595889835846-6d472ac3f665?q=80&w=1920&auto=format&fit=crop');
         background-size: cover;
         background-position: center;
+        background-attachment: fixed;
     }
     
     /* Tarjeta de login limpia */
     .login-card {
-        background: rgba(255, 255, 255, 0.97);
-        padding: 2.8rem;
-        border-radius: 16px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-        margin-top: 3rem;
+        background: rgba(255, 255, 255, 0.98);
+        padding: 3rem;
+        border-radius: 18px;
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+        margin-top: 4rem;
+        border: 1px solid #e0e0e0;
     }
     
     .badge-femsa {
         background-color: #F40009;
         color: white;
-        padding: 8px 20px;
-        border-radius: 8px;
+        padding: 8px 22px;
+        border-radius: 10px;
         font-weight: 900;
-        font-size: 1.1rem;
-        letter-spacing: 1.5px;
+        font-size: 1.2rem;
+        letter-spacing: 1.8px;
         display: inline-block;
-        margin-bottom: 1.5rem;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        margin-bottom: 1.8rem;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
     }
     
-    /* Títulos en color BLANCO para máxima visibilidad sobre el fondo oscuro */
+    /* Títulos en color BLANCO para máxima visibilidad sobre el fondo industrial */
     .login-title {
         font-weight: 800;
         color: #FFFFFF !important;
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
+        font-size: 1.6rem;
+        margin-bottom: 0.6rem;
         text-align: center;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* Sombra para que resalten */
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.9); /* Sombra fuerte para destacar */
     }
     
     .login-subtitle {
         color: #FFFFFF !important;
-        font-size: 1.0rem;
-        margin-bottom: 2rem;
+        font-size: 1.1rem;
+        margin-bottom: 2.5rem;
         font-weight: 600;
         text-align: center;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* Sombra para que resalten */
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.9); /* Sombra fuerte para destacar */
     }
     
     .stTextInput > div > div > input {
         color: #333;
+        font-size: 1.0rem;
     }
     
     .stButton>button {
@@ -77,17 +80,18 @@ st.markdown(
         color: white;
         font-weight: 800;
         border: none;
-        border-radius: 8px;
-        padding: 0.8rem;
+        border-radius: 10px;
+        padding: 0.9rem;
         transition: all 0.3s ease;
-        font-size: 1.0rem;
-        letter-spacing: 0.5px;
+        font-size: 1.1rem;
+        letter-spacing: 0.8px;
     }
     
     .stButton>button:hover {
         background-color: #c50007;
         color: white;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        transform: translateY(-1px);
     }
     </style>
     """,
@@ -100,7 +104,8 @@ if "autenticado" not in st.session_state:
 
 # Pantalla de Login
 if not st.session_state.autenticado:
-    col1, col2, col3 = st.columns([1, 2.4, 1])
+    # Usamos columnas para centrar la tarjeta
+    col1, col2, col3 = st.columns([1, 2.6, 1])
     
     with col2:
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
@@ -108,7 +113,7 @@ if not st.session_state.autenticado:
         # Cabecera visual
         st.markdown('<div style="text-align: center;"><span class="badge-femsa">COCA-COLA FEMSA</span></div>', unsafe_allow_html=True)
         
-        # Títulos en blanco con sombra, ahora sí se ven
+        # Títulos en blanco con sombra fuerte, ahora sí se ven sobre la fábrica
         st.markdown('<p class="login-title">SISTEMA DE SOPORTE A DECISIONES</p>', unsafe_allow_html=True)
         st.markdown('<p class="login-subtitle">Planta Barranquilla | Módulo CAPEX</p>', unsafe_allow_html=True)
         
@@ -129,6 +134,7 @@ if not st.session_state.autenticado:
         st.markdown('</div>', unsafe_allow_html=True)
 
 else:
+    # Pantalla temporal post-login para verificar
     st.success(f"¡Bienvenido, {st.session_state.usuario_actual}! Acceso concedido correctamente al sistema de la planta Barranquilla.")
     
     if st.button("Cerrar Sesión"):
