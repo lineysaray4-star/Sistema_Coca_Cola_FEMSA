@@ -37,7 +37,7 @@ except:
     }}
     """
 
-# Estilos CSS con el ancho original de la tarjeta y botón centrado
+# Estilos CSS precisos para tamaño compacto y centrado absoluto
 st.markdown(
     f"""
     <style>
@@ -49,15 +49,15 @@ st.markdown(
     
     {background_css}
     
-    /* Tarjeta blanca con su tamaño original y compacto entre las líneas */
+    /* Tarjeta blanca compacta y centrada */
     .login-card {{
         background: rgba(255, 255, 255, 0.98);
-        padding: 2.5rem;
+        padding: 2.2rem;
         border-radius: 16px;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
         margin-top: 1.5rem;
         border-top: 6px solid #F40009;
-        max-width: 450px;
+        max-width: 420px;
         margin-left: auto;
         margin-right: auto;
     }}
@@ -92,24 +92,36 @@ st.markdown(
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     }}
     
-    /* Centrar perfectamente el botón rojo de inicio de sesión */
+    /* Reducir el ancho de los inputs de usuario y contraseña para que sean pequeños */
+    div.stTextInput {{
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }}
+    
+    .stTextInput > div > div > input {{
+        color: #333;
+        font-size: 0.95rem;
+    }}
+    
+    /* Centrar estrictamente el botón rojo de iniciar sesión */
     div.stButton {{
         display: flex;
         justify-content: center;
         width: 100%;
-        margin-top: 1.2rem;
+        margin-top: 1.5rem;
     }}
     
     .stButton>button {{
-        width: 200px !important;
+        width: 170px !important;
         background-color: #F40009;
         color: white;
         font-weight: 800;
         border: none;
         border-radius: 8px;
-        padding: 0.7rem;
+        padding: 0.65rem;
         transition: all 0.3s ease;
-        font-size: 1rem;
+        font-size: 0.95rem;
         letter-spacing: 0.8px;
         display: block;
         margin: 0 auto;
@@ -134,7 +146,7 @@ if "autenticado" not in st.session_state:
 # 1. PANTALLA DE LOGIN
 # ==========================================
 if not st.session_state.autenticado:
-  col1, col2, col3 = st.columns([1, 1.5, 1])
+  col1, col2, col3 = st.columns([1, 1.4, 1])
 
   with col2:
     st.markdown(
