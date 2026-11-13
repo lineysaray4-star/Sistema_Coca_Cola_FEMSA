@@ -37,7 +37,7 @@ except:
     }}
     """
 
-# Estilos CSS con el tamaño original de la tarjeta y campos, centrando solo el botón
+# Estilos CSS con el ancho original de la tarjeta y botón centrado
 st.markdown(
     f"""
     <style>
@@ -49,14 +49,17 @@ st.markdown(
     
     {background_css}
     
-    /* Tarjeta blanca con su tamaño y padding original */
+    /* Tarjeta blanca con su tamaño original y compacto entre las líneas */
     .login-card {{
         background: rgba(255, 255, 255, 0.98);
         padding: 2.5rem;
         border-radius: 16px;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-        margin-top: 2rem;
+        margin-top: 1.5rem;
         border-top: 6px solid #F40009;
+        max-width: 450px;
+        margin-left: auto;
+        margin-right: auto;
     }}
     
     .badge-femsa {{
@@ -83,16 +86,17 @@ st.markdown(
     .login-subtitle {{
         color: #FFFFFF !important;
         font-size: 1rem;
-        margin-bottom: 1.8rem;
+        margin-bottom: 1.5rem;
         font-weight: 600;
         text-align: center;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     }}
     
-    /* Centrar exclusivamente el botón rojo de inicio de sesión */
+    /* Centrar perfectamente el botón rojo de inicio de sesión */
     div.stButton {{
         display: flex;
         justify-content: center;
+        width: 100%;
         margin-top: 1.2rem;
     }}
     
@@ -107,6 +111,8 @@ st.markdown(
         transition: all 0.3s ease;
         font-size: 1rem;
         letter-spacing: 0.8px;
+        display: block;
+        margin: 0 auto;
     }}
     
     .stButton>button:hover {{
@@ -128,7 +134,7 @@ if "autenticado" not in st.session_state:
 # 1. PANTALLA DE LOGIN
 # ==========================================
 if not st.session_state.autenticado:
-  col1, col2, col3 = st.columns([1, 2.4, 1])
+  col1, col2, col3 = st.columns([1, 1.5, 1])
 
   with col2:
     st.markdown(
