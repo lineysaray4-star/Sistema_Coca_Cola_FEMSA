@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Estilos CSS corporativos con fondo de fábrica y textos blancos
+# Estilos CSS corporativos con diseño industrial y máxima visibilidad
 st.markdown(
     """
     <style>
@@ -18,23 +18,21 @@ st.markdown(
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
     
-    /* Fondo con imagen de línea de envasado industrial de Coca-Cola y tono oscuro suave */
+    /* Fondo industrial moderno con textura y gradiente corporativo */
     .stApp {
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                    url('https://images.unsplash.com/photo-1595889835846-6d472ac3f665?q=80&w=1920&auto=format&fit=crop');
+        background: radial-gradient(circle at center, #1e1e1e 0%, #0d0d0d 100%);
         background-size: cover;
         background-position: center;
-        background-attachment: fixed;
     }
     
-    /* Tarjeta de login limpia */
+    /* Tarjeta de login impecable y flotante */
     .login-card {
-        background: rgba(255, 255, 255, 0.98);
+        background: #FFFFFF;
         padding: 3rem;
         border-radius: 18px;
-        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
-        margin-top: 4rem;
-        border: 1px solid #e0e0e0;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        margin-top: 3.5rem;
+        border-top: 6px solid #F40009;
     }
     
     .badge-femsa {
@@ -46,27 +44,25 @@ st.markdown(
         font-size: 1.2rem;
         letter-spacing: 1.8px;
         display: inline-block;
-        margin-bottom: 1.8rem;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        margin-bottom: 1.5rem;
     }
     
-    /* Títulos en color BLANCO para máxima visibilidad sobre el fondo industrial */
+    /* Títulos en blanco brillante para destacar sobre el fondo oscuro */
     .login-title {
         font-weight: 800;
         color: #FFFFFF !important;
         font-size: 1.6rem;
-        margin-bottom: 0.6rem;
+        margin-bottom: 0.5rem;
         text-align: center;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9); /* Sombra fuerte para destacar */
+        letter-spacing: 0.5px;
     }
     
     .login-subtitle {
-        color: #FFFFFF !important;
-        font-size: 1.1rem;
-        margin-bottom: 2.5rem;
+        color: #E0E0E0 !important;
+        font-size: 1.05rem;
+        margin-bottom: 2.2rem;
         font-weight: 600;
         text-align: center;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9); /* Sombra fuerte para destacar */
     }
     
     .stTextInput > div > div > input {
@@ -90,7 +86,7 @@ st.markdown(
     .stButton>button:hover {
         background-color: #c50007;
         color: white;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        box-shadow: 0 6px 15px rgba(244, 0, 9, 0.4);
         transform: translateY(-1px);
     }
     </style>
@@ -104,18 +100,17 @@ if "autenticado" not in st.session_state:
 
 # Pantalla de Login
 if not st.session_state.autenticado:
-    # Usamos columnas para centrar la tarjeta
     col1, col2, col3 = st.columns([1, 2.6, 1])
     
     with col2:
-        st.markdown('<div class="login-card">', unsafe_allow_html=True)
-        
-        # Cabecera visual
-        st.markdown('<div style="text-align: center;"><span class="badge-femsa">COCA-COLA FEMSA</span></div>', unsafe_allow_html=True)
-        
-        # Títulos en blanco con sombra fuerte, ahora sí se ven sobre la fábrica
+        # Cabecera de títulos fuera de la tarjeta blanca para que se lean perfecto en blanco
         st.markdown('<p class="login-title">SISTEMA DE SOPORTE A DECISIONES</p>', unsafe_allow_html=True)
         st.markdown('<p class="login-subtitle">Planta Barranquilla | Módulo CAPEX</p>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        
+        # Logo o insignia visual
+        st.markdown('<div style="text-align: center;"><span class="badge-femsa">COCA-COLA FEMSA</span></div>', unsafe_allow_html=True)
         
         # Campos del formulario
         usuario = st.text_input("Usuario", placeholder="Ingrese su usuario")
