@@ -37,7 +37,7 @@ except:
     }}
     """
 
-# Estilos CSS corregidos
+# Estilos CSS precisos
 st.markdown(
     f"""
     <style>
@@ -49,26 +49,26 @@ st.markdown(
     
     {background_css}
     
-    /* Tarjeta de login con altura superior reducida (menos espacio vacío arriba) */
+    /* Tarjeta blanca compacta y ajustada */
     .login-card {{
         background: rgba(255, 255, 255, 0.98);
-        padding: 1.8rem 2.5rem 2.5rem 2.5rem;
-        border-radius: 16px;
+        padding: 1.5rem 2rem 2rem 2rem;
+        border-radius: 14px;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-        margin-top: 1rem;
+        margin-top: 0.8rem;
         border-top: 6px solid #F40009;
     }}
     
     .badge-femsa {{
         background-color: #F40009;
         color: white;
-        padding: 6px 18px;
-        border-radius: 8px;
+        padding: 5px 16px;
+        border-radius: 6px;
         font-weight: 900;
-        font-size: 1.1rem;
+        font-size: 1rem;
         letter-spacing: 1.5px;
         display: inline-block;
-        margin-bottom: 1rem;
+        margin-bottom: 0.8rem;
     }}
     
     .login-title {{
@@ -83,18 +83,19 @@ st.markdown(
     .login-subtitle {{
         color: #FFFFFF !important;
         font-size: 1rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
         font-weight: 600;
         text-align: center;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     }}
     
+    /* Mantener los inputs en su tamaño original y compacto */
     .stTextInput > div > div > input {{
         color: #333;
-        font-size: 1rem;
+        font-size: 0.95rem;
     }}
     
-    /* Centrar perfectamente el botón de inicio de sesión */
+    /* Centrar exclusivamente el botón rojo de inicio de sesión */
     div.stButton {{
         display: flex;
         justify-content: center;
@@ -102,22 +103,24 @@ st.markdown(
     }}
     
     .stButton>button {{
-        width: 220px !important;
+        width: 180px !important;
         background-color: #F40009;
         color: white;
         font-weight: 800;
         border: none;
         border-radius: 8px;
-        padding: 0.75rem;
+        padding: 0.6rem;
         transition: all 0.3s ease;
-        font-size: 1rem;
+        font-size: 0.95rem;
         letter-spacing: 0.8px;
+        display: block;
+        margin: 0 auto;
     }}
     
     .stButton>button:hover {{
         background-color: #c50007;
         color: white;
-        box-shadow: 0 6px 15px rgba(244, 0, 9, 0.4);
+        box-shadow: 0 4px 12px rgba(244, 0, 9, 0.4);
         transform: translateY(-1px);
     }}
     </style>
@@ -133,7 +136,7 @@ if "autenticado" not in st.session_state:
 # 1. PANTALLA DE LOGIN
 # ==========================================
 if not st.session_state.autenticado:
-  col1, col2, col3 = st.columns([1, 2.5, 1])
+  col1, col2, col3 = st.columns([1, 2.4, 1])
 
   with col2:
     st.markdown(
