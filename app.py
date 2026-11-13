@@ -37,7 +37,7 @@ except:
     }}
     """
 
-# Estilos CSS precisos
+# Estilos CSS con el tamaño original de la tarjeta y campos, centrando solo el botón
 st.markdown(
     f"""
     <style>
@@ -49,33 +49,33 @@ st.markdown(
     
     {background_css}
     
-    /* Tarjeta blanca compacta y ajustada */
+    /* Tarjeta blanca con su tamaño y padding original */
     .login-card {{
         background: rgba(255, 255, 255, 0.98);
-        padding: 1.5rem 2rem 2rem 2rem;
-        border-radius: 14px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-        margin-top: 0.8rem;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        margin-top: 2rem;
         border-top: 6px solid #F40009;
     }}
     
     .badge-femsa {{
         background-color: #F40009;
         color: white;
-        padding: 5px 16px;
-        border-radius: 6px;
+        padding: 6px 18px;
+        border-radius: 8px;
         font-weight: 900;
-        font-size: 1rem;
+        font-size: 1.1rem;
         letter-spacing: 1.5px;
         display: inline-block;
-        margin-bottom: 0.8rem;
+        margin-bottom: 1.2rem;
     }}
     
     .login-title {{
         font-weight: 800;
         color: #FFFFFF !important;
         font-size: 1.5rem;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.4rem;
         text-align: center;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     }}
@@ -83,38 +83,30 @@ st.markdown(
     .login-subtitle {{
         color: #FFFFFF !important;
         font-size: 1rem;
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.8rem;
         font-weight: 600;
         text-align: center;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-    }}
-    
-    /* Mantener los inputs en su tamaño original y compacto */
-    .stTextInput > div > div > input {{
-        color: #333;
-        font-size: 0.95rem;
     }}
     
     /* Centrar exclusivamente el botón rojo de inicio de sesión */
     div.stButton {{
         display: flex;
         justify-content: center;
-        margin-top: 1rem;
+        margin-top: 1.2rem;
     }}
     
     .stButton>button {{
-        width: 180px !important;
+        width: 200px !important;
         background-color: #F40009;
         color: white;
         font-weight: 800;
         border: none;
         border-radius: 8px;
-        padding: 0.6rem;
+        padding: 0.7rem;
         transition: all 0.3s ease;
-        font-size: 0.95rem;
+        font-size: 1rem;
         letter-spacing: 0.8px;
-        display: block;
-        margin: 0 auto;
     }}
     
     .stButton>button:hover {{
