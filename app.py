@@ -37,7 +37,7 @@ except:
     }}
     """
 
-# Estilos CSS corporativos
+# Estilos CSS corregidos
 st.markdown(
     f"""
     <style>
@@ -49,41 +49,41 @@ st.markdown(
     
     {background_css}
     
-    /* Tarjeta de login */
+    /* Tarjeta de login con altura superior reducida (menos espacio vacío arriba) */
     .login-card {{
         background: rgba(255, 255, 255, 0.98);
-        padding: 3rem;
-        border-radius: 18px;
+        padding: 1.8rem 2.5rem 2.5rem 2.5rem;
+        border-radius: 16px;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-        margin-top: 2rem;
+        margin-top: 1rem;
         border-top: 6px solid #F40009;
     }}
     
     .badge-femsa {{
         background-color: #F40009;
         color: white;
-        padding: 8px 22px;
-        border-radius: 10px;
+        padding: 6px 18px;
+        border-radius: 8px;
         font-weight: 900;
-        font-size: 1.2rem;
-        letter-spacing: 1.8px;
+        font-size: 1.1rem;
+        letter-spacing: 1.5px;
         display: inline-block;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }}
     
     .login-title {{
         font-weight: 800;
         color: #FFFFFF !important;
-        font-size: 1.6rem;
-        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        margin-bottom: 0.3rem;
         text-align: center;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     }}
     
     .login-subtitle {{
         color: #FFFFFF !important;
-        font-size: 1.05rem;
-        margin-bottom: 2rem;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
         font-weight: 600;
         text-align: center;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
@@ -91,28 +91,27 @@ st.markdown(
     
     .stTextInput > div > div > input {{
         color: #333;
-        font-size: 1.0rem;
+        font-size: 1rem;
     }}
     
-    /* Centrar y estilizar el botón de inicio de sesión */
-    .stButton {{
+    /* Centrar perfectamente el botón de inicio de sesión */
+    div.stButton {{
         display: flex;
         justify-content: center;
+        margin-top: 1rem;
     }}
     
     .stButton>button {{
-        width: 70%;
+        width: 220px !important;
         background-color: #F40009;
         color: white;
         font-weight: 800;
         border: none;
-        border-radius: 10px;
-        padding: 0.8rem;
+        border-radius: 8px;
+        padding: 0.75rem;
         transition: all 0.3s ease;
-        font-size: 1.1rem;
+        font-size: 1rem;
         letter-spacing: 0.8px;
-        margin: 0 auto;
-        display: block;
     }}
     
     .stButton>button:hover {{
@@ -134,7 +133,7 @@ if "autenticado" not in st.session_state:
 # 1. PANTALLA DE LOGIN
 # ==========================================
 if not st.session_state.autenticado:
-  col1, col2, col3 = st.columns([1, 2.6, 1])
+  col1, col2, col3 = st.columns([1, 2.5, 1])
 
   with col2:
     st.markdown(
@@ -162,7 +161,6 @@ if not st.session_state.autenticado:
     st.markdown("<br>", unsafe_allow_html=True)
 
     if st.button("INICIAR SESIÓN"):
-      # Contraseña general: CocaCola2026 / Usuario cualquiera no vacío
       if usuario.strip() != "" and password == "CocaCola2026":
         st.session_state.autenticado = True
         st.session_state.usuario_actual = usuario
@@ -179,7 +177,6 @@ if not st.session_state.autenticado:
 # 2. APLICACIÓN PRINCIPAL (POST-LOGIN)
 # ==========================================
 else:
-  # Menú lateral de navegación
   with st.sidebar:
     st.image(
         "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&auto=format&fit=crop&q=80",
@@ -203,11 +200,9 @@ else:
       st.session_state.autenticado = False
       st.rerun()
 
-  # Contenido según la opción del menú seleccionado
   if menu == "🏠 Inicio / Resumen":
     st.title("🏭 Planta Coca-Cola FEMSA - Barranquilla")
     st.subheader("Sistema de Soporte a Decisiones (DSS) para Portafolio CAPEX")
-
     st.markdown(
         """
         Bienvenido al sistema gerencial de optimización y priorización de proyectos de inversión. 
@@ -215,7 +210,6 @@ else:
         """
     )
 
-    # Métricas rápidas de ejemplo
     col1, col2, col3 = st.columns(3)
     with col1:
       st.metric(
@@ -231,8 +225,8 @@ else:
   elif menu == "📋 Registro de Proyectos":
     st.title("📋 Registro y Gestión de Proyectos CAPEX")
     st.info(
-        "Aquí es donde crearemos el formulario para registrar los proyectos con"
-        " sus costos, puntajes AHP y restricciones."
+        "Aquí crearemos el formulario para registrar los proyectos con sus"
+        " costos, puntajes AHP y restricciones."
     )
 
   elif menu == "⚙️ Optimización Multiperiodo":
