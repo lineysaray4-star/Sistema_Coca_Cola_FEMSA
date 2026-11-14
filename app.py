@@ -119,7 +119,7 @@ st.markdown(
         font-weight: 800 !important;
         border-radius: 8px !important;
         padding: 0.65rem !important;
-        width: 180px !important;
+        width: 220px !important;
         display: block !important;
         margin: 1.5rem auto 0 auto !important;
         border: none !important;
@@ -210,6 +210,9 @@ if "autenticado" not in st.session_state:
 if "lista_proyectos" not in st.session_state:
   st.session_state.lista_proyectos = []
 
+if "menu_actual" not in st.session_state:
+  st.session_state.menu_actual = "🏠 Inicio / Resumen"
+
 # ==========================================
 # 1. PANTALLA DE LOGIN
 # ==========================================
@@ -256,13 +259,28 @@ if not st.session_state.autenticado:
 # ==========================================
 else:
   with st.sidebar:
-    # Lógica condicional para la imagen de la barra lateral
-    menu_eval = st.session_state.get(
-        "menu_actual", "🏠 Inicio / Resumen"
-    )  # Referencia temporal
+    # 1. Imagen arriba del todo en la barra lateral
+    if st.session_state.menu_actual == "🏠 Inicio / Resumen":
+      st.image(
+          "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&auto=format&fit=crop&q=80",
+          use_container_width=True,
+      )
+    else:
+      if logo_base64:
+        st.markdown(
+            f"""
+                <div style="text-align: center; padding: 0.2rem 0 0.8rem 0;">
+                    <img src="data:image/png;base64,{logo_base64}" style="width: 90%; max-width: 190px;">
+                </div>
+                """,
+            unsafe_allow_html=True,
+        )
+      else:
+        st.image(
+            "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&auto=format&fit=crop&q=80",
+            use_container_width=True,
+        )
 
-  # Definición del menú lateral
-  with st.sidebar:
     st.markdown(f"### 👤 Usuario: **{st.session_state.usuario_actual}**")
     st.markdown("---")
 
@@ -275,31 +293,8 @@ else:
             "⚙️ Optimización Multiperiodo",
             "📊 Reportes & Brief",
         ],
+        key="menu_actual",
     )
-
-    st.markdown("---")
-
-    # Mostrar imagen condicional en la barra lateral según la página seleccionada
-    if menu == "🏠 Inicio / Resumen":
-      st.image(
-          "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&auto=format&fit=crop&q=80",
-          use_container_width=True,
-      )
-    else:
-      if logo_base64:
-        st.markdown(
-            f"""
-                <div style="text-align: center; padding: 0.5rem 0 1rem 0;">
-                    <img src="data:image/png;base64,{logo_base64}" style="width: 85%; max-width: 180px;">
-                </div>
-                """,
-            unsafe_allow_html=True,
-        )
-      else:
-        st.image(
-            "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&auto=format&fit=crop&q=80",
-            use_container_width=True,
-        )
 
     st.markdown("---")
     if st.button("🚪 Cerrar Sesión"):
@@ -339,7 +334,7 @@ else:
       st.metric(label="Estado del Sistema", value="Activo")
 
   # ------------------------------------------
-  # REGISTRO DE PROYECTOS (BRIEF MGIP + AHP 0-10)
+  # REGISTRO DE PROYECTOS (BRIEF MGIP + AHP 0-10 ENTEROS)
   # ------------------------------------------
   elif menu == "📋 Registro de Proyectos":
     st.markdown(
@@ -377,11 +372,15 @@ else:
         )
         pais_sol = st.text_input("País Solicitante", value="Colombia")
         area_sol = st.selectbox(
-            "Área Solicitante / Ubicación Planta",
+            "Área / Ubicación (Modelo 3D Planta)",
             [
                 "Línea 1 (L1)",
                 "Línea 2 (L2)",
                 "Línea 3 (L3)",
+                "Línea 4 (L4)",
+                "Soplado",
+                "Embotellado / Llenadora",
+                "Paletizado / Empacadora",
                 "Jarabe / Preparación",
                 "Almacén / Bodega",
                 "Servicios Industriales (SCI)",
@@ -438,72 +437,77 @@ else:
             "Equipo / Zona / Detalle", placeholder="Ej. Compresor Amoniaco"
         )
       with col_n3:
-        linea_nom = st.selectbox("Línea", ["L1", "L2", "L3", "General / Planta"])
+        linea_nom = st.selectbox(
+            "Línea", ["L1", "L2", "L3", "L4", "General"]
+        )
 
       nomenclatura_generada = (
           f"{accion_nom} {equipo_nom} {linea_nom} BQA"[:40]
           if equipo_nom.strip()
           else "Pendiente de definir"
       )
-      st.info(f"📌 **Nombre del Requerimiento Resultante:** {nomenclatura_generada}")
+
+      st.markdown(
+          f"""
+            <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
+                <span style="color: #FFFFFF !important; font-size: 0.95rem;">📌 <b>Nombre del Requerimiento Resultante:</b> {nomenclatura_generada}</span>
+            </div>
+            """,
+          unsafe_allow_html=True,
+      )
 
       st.markdown("---")
       st.markdown(
-          "#### 🎯 Evaluación Multicriterio AHP (Puntuación de 0 a 10 por"
-          " Criterio)"
+          "#### 🎯 Evaluación Multicriterio AHP (Puntuación de 0 a 10"
+          " enteros)"
       )
       st.markdown(
-          "Califique el impacto de la iniciativa en cada uno de los 7 criterios"
-          " corporativos ponderados:"
+          "Califique el impacto de la iniciativa en cada uno de los 7"
+          " criterios corporativos ponderados:"
       )
 
       c1 = st.slider(
-          "1. Seguridad y cumplimiento normativo (Peso: 31.97%)",
-          0.0,
-          10.0,
-          5.0,
-          0.5,
+          "1. Seguridad y cumplimiento normativo (Peso: 31.97%)", 0, 10, 5, 1
       )
       c2 = st.slider(
           "2. Rentabilidad y optimización de recursos (Peso: 20.53%)",
-          0.0,
-          10.0,
-          5.0,
-          0.5,
+          0,
+          10,
+          5,
+          1,
       )
       c3 = st.slider(
           "3. Continuidad operativa y salud de activos (Peso: 18.94%)",
-          0.0,
-          10.0,
-          5.0,
-          0.5,
+          0,
+          10,
+          5,
+          1,
       )
       c4 = st.slider(
-          "4. Alineación estratégica y LRP (Peso: 13.99%)", 0.0, 10.0, 5.0, 0.5
+          "4. Alineación estratégica y LRP (Peso: 13.99%)", 0, 10, 5, 1
       )
       c5 = st.slider(
           "5. Gestión de riesgos técnicos y operacionales (Peso: 8.72%)",
-          0.0,
-          10.0,
-          5.0,
-          0.5,
+          0,
+          10,
+          5,
+          1,
       )
       c6 = st.slider(
           "6. Complejidad y desafíos de ejecución técnica (Peso: 3.83%)",
-          0.0,
-          10.0,
-          5.0,
-          0.5,
+          0,
+          10,
+          5,
+          1,
       )
       c7 = st.slider(
           "7. Impacto en el servicio y desarrollo humano (Peso: 2.02%)",
-          0.0,
-          10.0,
-          5.0,
-          0.5,
+          0,
+          10,
+          5,
+          1,
       )
 
-      # Cálculo ponderado automático AHP en escala 0-10
       ahp_score_calculado = (
           (c1 * 0.3197)
           + (c2 * 0.2053)
@@ -513,9 +517,15 @@ else:
           + (c6 * 0.0383)
           + (c7 * 0.0202)
       )
-      st.info(
-          f"📊 **Puntaje Ponderado AHP Calculado:**"
-          f" {ahp_score_calculado:.2f} / 10.0"
+      score_entero = int(round(ahp_score_calculado))
+
+      st.markdown(
+          f"""
+            <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
+                <span style="color: #FFFFFF !important; font-size: 0.95rem;">📊 <b>Puntaje Ponderado AHP Calculado:</b> {score_entero} / 10</span>
+            </div>
+            """,
+          unsafe_allow_html=True,
       )
 
       st.markdown("---")
@@ -523,8 +533,8 @@ else:
       antecedentes = st.text_area(
           "Antecedentes",
           placeholder=(
-              "Describir situación actual, causa del problema, afectación al"
-              " negocio y por qué..."
+              "Describir situación actual, causa del problema, afectación"
+              " al negocio y por qué..."
           ),
       )
       objetivo = st.text_area(
@@ -548,16 +558,18 @@ else:
       riesgos = st.text_area(
           "Riesgos",
           placeholder=(
-              "Riesgos detectados (cuantitativos/cualitativos) y qué pasa si no"
-              " se ejecuta el cambio..."
+              "Riesgos detectados (cuantitativos/cualitativos) y qué pasa"
+              " si no se ejecuta el cambio..."
           ),
       )
 
-      btn_submit_brief = st.form_submit_button("🚀 Enviar Brief y Registrar")
+      btn_submit_brief = st.form_submit_button("🚀 Enviar Registro")
 
       if btn_submit_brief:
         if not equipo_nom.strip():
-          st.error("Por favor indique el equipo o detalle para la nomenclatura.")
+          st.error(
+              "Por favor indique el equipo o detalle para la nomenclatura."
+          )
         elif capex_usd <= 0:
           st.error("El monto CAPEX debe ser mayor a 0.")
         else:
@@ -570,7 +582,7 @@ else:
               "anio": anio_ejec,
               "capex": capex_usd,
               "opex": opex_usd,
-              "ahp": round(ahp_score_calculado, 2),
+              "ahp": score_entero,
               "antecedentes": antecedentes,
               "objetivo": objetivo,
               "descripcion": descripcion_req,
@@ -579,8 +591,8 @@ else:
           }
           st.session_state.lista_proyectos.append(nuevo_proyecto)
           st.success(
-              f"¡Brief '{nomenclatura_generada}' cargado y registrado"
-              " exitosamente con AHP {round(ahp_score_calculado, 2)}/10!"
+              f"¡Proyecto '{nomenclatura_generada}' registrado exitosamente"
+              f" con AHP {score_entero}/10 y subido al mural!"
           )
 
   # ------------------------------------------
