@@ -41,7 +41,7 @@ except:
 logo_html = '<span class="coca-cola-font">Coca-Cola</span>'
 try:
   logo_str = get_base64_of_bin_file("logo_coca.png")
-  logo_html = f'<img src="data:image/png;base64,{logo_str}" style="height: 1.4em; vertical-align: middle; margin: 0 5px; display: inline-block;">'
+  logo_html = f'<img src="data:image/png;base64,{logo_str}" style="height: 1.3em; vertical-align: middle; margin: 0 4px; display: inline-block;">'
 except:
   pass
 
@@ -132,34 +132,24 @@ st.markdown(
     /* Tarjetas contenedoras para el panel principal */
     .dashboard-card {{
         background: rgba(20, 20, 20, 0.85);
-        padding: 2.2rem;
+        padding: 2rem;
         border-radius: 14px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         border-left: 6px solid #F40009;
         margin-bottom: 1.5rem;
     }}
 
-    .dashboard-card h3 {{
-        color: #FFFFFF !important;
-    }}
-
-    /* Estilos específicos para el título principal */
+    /* Estilos específicos para el título principal en negrita */
     .plant-title {{
         font-family: 'Plus Jakarta Sans', sans-serif;
-        font-weight: 400 !important;
+        font-weight: 700 !important;
         color: #FFFFFF !important;
         font-size: 1.8rem;
-        margin-bottom: 0.5rem;
-    }}
-
-    .coca-cola-font {{
-        font-family: 'Pacifico', cursive !important;
-        font-weight: 400 !important;
-        color: #F40009;
     }}
 
     .barranquilla-text {{
         font-size: 0.85em;
+        font-weight: 700 !important;
     }}
 
     /* Estilo profesional para las métricas (números en rojo corporativo) */
@@ -178,9 +168,6 @@ st.markdown(
         color: #F40009 !important;
         font-weight: 800 !important;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-    }}
-    [data-testid="stMetricDelta"] {{
-        color: #FFFFFF !important;
     }}
     </style>
     """,
@@ -263,9 +250,8 @@ else:
     st.markdown(
         f"""
         <div class="dashboard-card">
-            <div class="plant-title">Planta {logo_html} FEMSA - <span class="barranquilla-text">Barranquilla</span></div>
-            <h3>Sistema de Soporte a Decisiones (DSS) para Portafolio CAPEX</h3>
-            <p style="margin-top: 1rem; font-weight: 600; color: #FFFFFF;">
+            <div class="plant-title"><b>Planta {logo_html} FEMSA - <span class="barranquilla-text">Barranquilla</span></b></div>
+            <p style="margin-top: 1rem; font-weight: 600; color: #FFFFFF; font-size: 1.1rem;">
                 ¡Bienvenido al sistema!
             </p>
         </div>
@@ -275,15 +261,11 @@ else:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-      st.metric(
-          label="Proyectos Registrados", value="0", delta="Pendiente de carga"
-      )
+      st.metric(label="Proyectos Registrados", value="0")
     with col2:
-      st.metric(label="Presupuesto Asignado ($)", value="$0", delta="Estable")
+      st.metric(label="Presupuesto Asignado ($)", value="$0")
     with col3:
-      st.metric(
-          label="Estado del Sistema", value="Activo", delta="Conectado a Planta"
-      )
+      st.metric(label="Estado del Sistema", value="Activo")
 
   elif menu == "📋 Registro de Proyectos":
     st.markdown(
