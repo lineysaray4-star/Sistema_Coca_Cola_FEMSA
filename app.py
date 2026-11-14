@@ -255,7 +255,6 @@ if "pesos_ahp" not in st.session_state:
 for key, default_val in VALORES_EXCEL_DEFAULT.items():
   session_key = f"slider_{key}"
   if session_key not in st.session_state:
-    # Cargar el valor correspondiente del peso guardado actual
     st.session_state[session_key] = float(
         st.session_state.pesos_ahp[key] * 100
     )
@@ -405,7 +404,7 @@ else:
       st.metric(label="Estado del Sistema", value="Activo")
 
   # ------------------------------------------
-  # CONFIGURACIÓN AHP (CON BOTÓN DE GUARDAR Y PREDETERMINADO)
+  # CONFIGURACIÓN AHP
   # ------------------------------------------
   elif menu == "⚙️ Configuración AHP":
     st.markdown(
@@ -414,18 +413,16 @@ else:
             <h2>⚙️ Configuración y Ponderación de Criterios AHP</h2>
             <p style="margin-top: 0.8rem; color: #CCCCCC; line-height: 1.6;">
                 <b>Instrucciones:</b> Deslice las barras en una escala de 0 a 100 para definir la importancia relativa de cada criterio. Cuando esté lista, haga clic en <b>"💾 Guardar Pesos Seleccionados"</b> para asegurarte de que estos pesos queden guardados permanentemente y se utilicen en las evaluaciones de los proyectos. <br><br>
-                Si lo prefieres, puedes hacer clic en <b>"🔄 Cargar Valores Predeterminados (Excel)"</b> para restaurar instantáneamente los valores base originales.
+                Si lo prefiere, puede hacer clic en <b>"🔄 Cargar Valores Predeterminados (Excel)"</b> para restaurar instantáneamente los valores base originales.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Botones de Acción (Guardar vs Predeterminados)
     col_b1, col_b2 = st.columns(2)
     with col_b1:
       if st.button("💾 Guardar Pesos Seleccionados", use_container_width=True):
-        # Recopilar valores de las barras
         raw_scores = {}
         for crit in VALORES_EXCEL_DEFAULT.keys():
           raw_scores[crit] = st.session_state[f"slider_{crit}"]
@@ -438,7 +435,6 @@ else:
               k: 1.0 / len(VALORES_EXCEL_DEFAULT) for k in raw_scores.keys()
           }
 
-        # Guardar permanentemente en session_state para que persista al cambiar de pantalla
         st.session_state.pesos_ahp = pesos_normalizados
         st.success(
             "✅ ¡Pesos guardados exitosamente! Se mantendrán vigentes al"
@@ -460,12 +456,10 @@ else:
 
     st.markdown("### 🎚️ Nivel de Importancia por Criterio (0 a 100)")
 
-    # Sliders de 0 a 100 con sus respectivas llaves en session_state
     for crit in VALORES_EXCEL_DEFAULT.keys():
       session_key = f"slider_{crit}"
       st.slider(f"{crit}", 0.0, 100.0, key=session_key, step=1.0)
 
-    # Calcular distribución para el gráfico en tiempo real basado en los sliders actuales
     raw_preview = {
         crit: st.session_state[f"slider_{crit}"]
         for crit in VALORES_EXCEL_DEFAULT.keys()
@@ -485,13 +479,13 @@ else:
     })
 
     paleta_colores = [
-        "#E61C24",  # Rojo Coca-Cola
-        "#0072B2",  # Azul corporativo
-        "#009E73",  # Verde esmeralda
-        "#CC79A7",  # Morado / Magenta
-        "#D55E00",  # Naranja intenso
-        "#56B4E9",  # Azul cian
-        "#F0E442",  # Amarillo brillante
+        "#E61C24",
+        "#0072B2",
+        "#009E73",
+        "#CC79A7",
+        "#D55E00",
+        "#56B4E9",
+        "#F0E442",
     ]
 
     fig = px.pie(
@@ -531,6 +525,102 @@ else:
         unsafe_allow_html=True,
     )
 
+    # --- NOMENCLATURA FUERA DEL FORMULARIO (ACTUALIZACIÓN EN TIEMPO REAL) ---
+    st.markdown("### ⚙️ Generación de Nomenclatura del Requerimiento")
+    st.markdown(
+        "*Normativa (Máx. 40 caracteres): Acción + Equipo/Zona + Línea + BQA"
+        " (Ej: Reemplazo Compresor L2 BQA)*"
+    )
+
+    col_n1, col_n2, col_n3 = st.columns(3)
+    with col_n1:
+      accion_nom = st.selectbox(
+          "Acción",
+          [
+              "Reemplazo",
+              "Adecuación",
+              "Ampliación",
+              "Adquisición",
+              "Instalación",
+              "Reingeniería",
+          ],
+          key="input_accion",
+      )
+    with col_n2:
+      equipo_nom = st.text_input(
+          "Equipo / Zona / Detalle",
+          placeholder="Ej. Compresor Amoniaco",
+          key="input_equipo",
+      )
+    with col_n3:
+      linea_nom = st.selectbox(
+          "Línea", ["L1", "L2", "L3", "L4", "General"], key="input_linea"
+      )
+
+    nomenclatura_generada = (
+        f"{accion_nom} {equipo_nom} {linea_nom} BQA"[:40]
+        if equipo_nom.strip()
+        else "Pendiente de definir"
+    )
+
+    st.markdown(
+        f"""
+        <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
+            <span style="color: #FFFFFF !important; font-size: 0.95rem;">📌 <b>Nombre del Requerimiento Resultante:</b> {nomenclatura_generada}</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("---")
+
+    # --- EVALUACIÓN AHP FUERA DEL FORMULARIO (CÁLCULO EN TIEMPO REAL) ---
+    st.markdown(
+        "#### 🎯 Evaluación Multicriterio AHP (Puntuación de 0 a 10" " enteros)"
+    )
+    st.markdown(
+        "Califique el impacto de la iniciativa en cada criterio corporativo"
+        " usando los pesos guardados:"
+    )
+
+    if "pesos_ahp" not in st.session_state:
+      suma_def = sum(VALORES_EXCEL_DEFAULT.values())
+      st.session_state.pesos_ahp = {
+          k: v / suma_def for k, v in VALORES_EXCEL_DEFAULT.items()
+      }
+
+    criterios_keys = list(st.session_state.pesos_ahp.keys())
+
+    c1_val = st.slider(f"1. {criterios_keys[0]}", 0, 10, 5, 1, key="eval_c1")
+    c2_val = st.slider(f"2. {criterios_keys[1]}", 0, 10, 5, 1, key="eval_c2")
+    c3_val = st.slider(f"3. {criterios_keys[2]}", 0, 10, 5, 1, key="eval_c3")
+    c4_val = st.slider(f"4. {criterios_keys[3]}", 0, 10, 5, 1, key="eval_c4")
+    c5_val = st.slider(f"5. {criterios_keys[4]}", 0, 10, 5, 1, key="eval_c5")
+    c6_val = st.slider(f"6. {criterios_keys[5]}", 0, 10, 5, 1, key="eval_c6")
+    c7_val = st.slider(f"7. {criterios_keys[6]}", 0, 10, 5, 1, key="eval_c7")
+
+    pesos_lista = list(st.session_state.pesos_ahp.values())
+    ahp_score_calculado = (
+        (c1_val * pesos_lista[0])
+        + (c2_val * pesos_lista[1])
+        + (c3_val * pesos_lista[2])
+        + (c4_val * pesos_lista[3])
+        + (c5_val * pesos_lista[4])
+        + (c6_val * pesos_lista[5])
+        + (c7_val * pesos_lista[6])
+    )
+    score_entero = int(round(ahp_score_calculado))
+
+    st.markdown(
+        f"""
+        <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
+            <span style="color: #FFFFFF !important; font-size: 0.95rem;">📊 <b>Puntaje Ponderado AHP Calculado:</b> {score_entero} / 10</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("---")
+
+    # --- FORMULARIO CON EL RESTO DE CAMPOS DEL BRIEF Y BOTÓN DE ENVÍO ---
     with st.form("form_brief_mgip"):
       st.markdown("### 📝 Captura de Brief (Estándar ServiceNow MGIP)")
 
@@ -579,91 +669,6 @@ else:
             step=1000.0,
             value=0.0,
         )
-
-      st.markdown("---")
-      st.markdown("#### ⚙️ Generación de Nomenclatura del Requerimiento")
-      st.markdown(
-          "*Normativa (Máx. 40 caracteres): Acción + Equipo/Zona + Línea + BQA"
-          " (Ej: Reemplazo Compresor L2 BQA)*"
-      )
-
-      col_n1, col_n2, col_n3 = st.columns(3)
-      with col_n1:
-        accion_nom = st.selectbox(
-            "Acción",
-            [
-                "Reemplazo",
-                "Adecuación",
-                "Ampliación",
-                "Adquisición",
-                "Instalación",
-                "Reingeniería",
-            ],
-        )
-      with col_n2:
-        equipo_nom = st.text_input(
-            "Equipo / Zona / Detalle", placeholder="Ej. Compresor Amoniaco"
-        )
-      with col_n3:
-        linea_nom = st.selectbox(
-            "Línea", ["L1", "L2", "L3", "L4", "General"]
-        )
-
-      nomenclatura_generada = (
-          f"{accion_nom} {equipo_nom} {linea_nom} BQA"[:40]
-          if equipo_nom.strip()
-          else "Pendiente de definir"
-      )
-
-      st.markdown(
-          f"""
-            <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
-                <span style="color: #FFFFFF !important; font-size: 0.95rem;">📌 <b>Nombre del Requerimiento Resultante:</b> {nomenclatura_generada}</span>
-            </div>
-            """,
-          unsafe_allow_html=True,
-      )
-
-      st.markdown("---")
-      st.markdown(
-          "#### 🎯 Evaluación Multicriterio AHP (Puntuación de 0 a 10"
-          " enteros)"
-      )
-      st.markdown(
-          "Califique el impacto de la iniciativa en cada criterio corporativo"
-          " usando los pesos guardados:"
-      )
-
-      criterios_keys = list(st.session_state.pesos_ahp.keys())
-
-      c1_val = st.slider(f"1. {criterios_keys[0]}", 0, 10, 5, 1)
-      c2_val = st.slider(f"2. {criterios_keys[1]}", 0, 10, 5, 1)
-      c3_val = st.slider(f"3. {criterios_keys[2]}", 0, 10, 5, 1)
-      c4_val = st.slider(f"4. {criterios_keys[3]}", 0, 10, 5, 1)
-      c5_val = st.slider(f"5. {criterios_keys[4]}", 0, 10, 5, 1)
-      c6_val = st.slider(f"6. {criterios_keys[5]}", 0, 10, 5, 1)
-      c7_val = st.slider(f"7. {criterios_keys[6]}", 0, 10, 5, 1)
-
-      pesos_lista = list(st.session_state.pesos_ahp.values())
-      ahp_score_calculado = (
-          (c1_val * pesos_lista[0])
-          + (c2_val * pesos_lista[1])
-          + (c3_val * pesos_lista[2])
-          + (c4_val * pesos_lista[3])
-          + (c5_val * pesos_lista[4])
-          + (c6_val * pesos_lista[5])
-          + (c7_val * pesos_lista[6])
-      )
-      score_entero = int(round(ahp_score_calculado))
-
-      st.markdown(
-          f"""
-            <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
-                <span style="color: #FFFFFF !important; font-size: 0.95rem;">📊 <b>Puntaje Ponderado AHP Calculado:</b> {score_entero} / 10</span>
-            </div>
-            """,
-          unsafe_allow_html=True,
-      )
 
       st.markdown("---")
       st.markdown("#### 📄 Secciones Descriptivas del Brief")
