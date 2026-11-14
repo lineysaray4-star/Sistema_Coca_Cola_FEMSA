@@ -376,15 +376,16 @@ else:
       st.metric(label="Estado del Sistema", value="Activo")
 
   # ------------------------------------------
-  # CONFIGURACIÓN AHP (SLIDERS + BOTÓN PREDETERMINADO + DIAGRAMA CIRCULAR)
+  # CONFIGURACIÓN AHP (INTERFAZ VISUAL + NORMALIZACIÓN A DONUT CHART)
   # ------------------------------------------
   elif menu == "⚙️ Configuración AHP":
     st.markdown(
         """
         <div class="dashboard-card">
-            <h2>⚙️ Configuración Opcional de Ponderaciones AHP</h2>
-            <p style="margin-top: 0.5rem; color: #CCCCCC;">
-                <b>Instrucciones:</b> Ajuste las barritas deslizantes según el peso ponderado y la importancia que le quiera dar a cada criterio corporativo. El sistema normalizará automáticamente los porcentajes para que el total sume siempre el 100%. Si lo prefiere, puede hacer clic en el botón inferior para restaurar los porcentajes originales calculados previamente en Excel.
+            <h2>⚙️ Configuración Visual y Ponderación de Criterios AHP</h2>
+            <p style="margin-top: 0.8rem; color: #CCCCCC; line-height: 1.5;">
+                <b>Instrucciones para el usuario:</b> Ajuste las barras deslizantes según el peso ponderado y la importancia relativa que le quiera dar a cada criterio corporativo. No necesita preocuparse por calcular porcentajes exactos; el sistema normalizará automáticamente los valores de forma visual. El diagrama circular inferior reflejará en tiempo real los porcentajes reales resultantes que suman el 100%. <br><br>
+                Si lo prefiere, puede hacer clic en el botón de abajo para restaurar de inmediato los valores predeterminados calculados previamente en Excel.
             </p>
         </div>
         """,
@@ -400,19 +401,19 @@ else:
       )
       st.rerun()
 
-    st.markdown("### 🎚️ Ajuste Dinámico de Criterios")
+    st.markdown("### 🎚️ Ajuste Visual de Criterios (Peso Relativo)")
 
     criterios = list(st.session_state.pesos_ahp.keys())
     raw_values = {}
 
-    # Generar los sliders para cada criterio
+    # Sliders visuales limpios sin porcentajes molestos en los títulos
     for crit in criterios:
       val_actual = float(st.session_state.pesos_ahp[crit] * 100)
       raw_values[crit] = st.slider(
-          f"Ponderación para: {crit}", 0.0, 100.0, val_actual, 0.5, key=f"sl_{crit}"
+          f"{crit}", 0.0, 100.0, val_actual, 1.0, key=f"sl_{crit}"
       )
 
-    # Normalización automática para que la suma total sea exactamente 100%
+    # Normalización automática para que la suma total sea exactamente 100% de cara a los cálculos
     suma_raw = sum(raw_values.values())
     if suma_raw > 0:
       pesos_normalizados = {k: v / suma_raw for k, v in raw_values.items()}
@@ -421,17 +422,16 @@ else:
           k: 1.0 / len(criterios) for k in raw_values.keys()
       }
 
-    # Guardar en session_state de inmediato para que afecte todos los cálculos
     st.session_state.pesos_ahp = pesos_normalizados
 
     st.markdown("---")
-    st.markdown("### 📊 Distribución Porcentual Actual (Diagrama Circular)")
+    st.markdown("### 📊 Resultado en el Diagrama Circular (Suma 100%)")
     st.markdown(
-        "El siguiente gráfico refleja en tiempo real los porcentajes"
-        " ponderados vigentes:"
+        "Visualización en tiempo real de la distribución porcentual resultante"
+        " tras sus ajustes:"
     )
 
-    # Crear gráfico circular con Plotly
+    # Crear gráfico circular con Plotly (Dona corporativa)
     df_chart = pd.DataFrame({
         "Criterio": list(pesos_normalizados.keys()),
         "Porcentaje": [v * 100 for v in pesos_normalizados.values()],
@@ -441,7 +441,7 @@ else:
         df_chart,
         names="Criterio",
         values="Porcentaje",
-        hole=0.4,  # Estilo de dona corporativo
+        hole=0.4,
         color_discrete_sequence=px.colors.sequential.Reds_r,
     )
     fig.update_layout(
@@ -451,7 +451,7 @@ else:
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=-0.6,
+            y=-0.7,
             xanchor="center",
             x=0.5,
         ),
@@ -459,7 +459,7 @@ else:
     st.plotly_chart(fig, use_container_width=True)
 
   # ------------------------------------------
-  # REGISTRO DE PROYECTOS (CON 20 LUGARES Y SIN PESOS FIJOS)
+  # REGISTRO DE PROYECTOS
   # ------------------------------------------
   elif menu == "📋 Registro de Proyectos":
     st.markdown(
@@ -577,11 +577,10 @@ else:
       )
       st.markdown(
           "Califique el impacto de la iniciativa en cada criterio corporativo"
-          " (se aplicarán automáticamente los pesos configurados en la"
-          " sección AHP):"
+          " (se aplicarán automáticamente los pesos vigentes configurados en"
+          " la sección AHP):"
       )
 
-      # Sliders de evaluación limpios (sin porcentajes fijos, usando dinámicamente st.session_state.pesos_ahp)
       criterios_keys = list(st.session_state.pesos_ahp.keys())
 
       c1_val = st.slider(f"1. {criterios_keys[0]}", 0, 10, 5, 1)
