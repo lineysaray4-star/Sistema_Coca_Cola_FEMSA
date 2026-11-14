@@ -215,7 +215,7 @@ if "lista_proyectos" not in st.session_state:
 if "menu_actual" not in st.session_state:
   st.session_state.menu_actual = "🏠 Inicio / Resumen"
 
-# Pesos AHP iniciales almacenados en session_state para que sean modificables
+# Pesos AHP iniciales almacenados en session_state (en escala de 0 a 1)
 if "pesos_ahp" not in st.session_state:
   st.session_state.pesos_ahp = {
       "Seguridad y cumplimiento normativo": 0.3197,
@@ -372,7 +372,7 @@ else:
       st.metric(label="Estado del Sistema", value="Activo")
 
   # ------------------------------------------
-  # CONFIGURACIÓN AHP (PESOS MODIFICABLES)
+  # CONFIGURACIÓN AHP (CON NORMALIZACIÓN AUTOMÁTICA AL 100%)
   # ------------------------------------------
   elif menu == "⚙️ Configuración AHP":
     st.markdown(
@@ -380,55 +380,58 @@ else:
         <div class="dashboard-card">
             <h2>⚙️ Configuración y Modificación de Criterios AHP</h2>
             <p style="margin-top: 0.5rem; color: #CCCCCC;">
-                Modifique los porcentajes ponderados de cada criterio corporativo. Estos valores se aplicarán de forma dinámica en todos los cálculos de los proyectos.
+                Modifique los valores porcentuales según su criterio. El sistema ajustará y normalizará automáticamente el total al 100% de manera inteligente sin que tenga que calcularlo manualmente.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    st.markdown("### 📊 Tabla de Ponderaciones Actuales")
-    st.markdown(
-        "Ajuste el valor porcentual o ponderado de cada criterio según los"
-        " lineamientos de Coca-Cola FEMSA:"
-    )
+    st.markdown("### 📊 Ponderación de Criterios Corporativos")
 
     with st.form("form_config_ahp"):
-      nuevos_pesos = {}
-      suma_actual = 0.0
+      inputs_temporales = {}
 
-      # Iterar sobre los criterios existentes para crear controles deslizantes/inputs modificables
       for criterio, peso_actual in st.session_state.pesos_ahp.items():
-        # Permitir modificar en porcentaje (0 a 100) para mayor comodidad del usuario
         val_pct = st.number_input(
             f"{criterio} (%)",
             min_value=0.0,
             max_value=100.0,
             value=float(peso_actual * 100),
-            step=0.1,
+            step=0.5,
             format="%.2f",
         )
-        nuevos_pesos[criterio] = val_pct / 100.0
-        suma_actual += val_pct
+        inputs_temporales[criterio] = val_pct
 
-      st.markdown(f"**Suma total de porcentajes:** `{suma_actual:.2f}%`")
-
-      btn_guardar_pesos = st.form_submit_button("💾 Guardar Nuevos Pesos AHP")
+      btn_guardar_pesos = st.form_submit_button(
+          "💾 Guardar y Normalizar Automáticamente"
+      )
 
       if btn_guardar_pesos:
-        if abs(suma_actual - 100.0) > 0.05:
-          st.warning(
-              "⚠️ Advertencia: La suma de los porcentajes debería ser del"
-              f" 100% (actualmente es {suma_actual:.2f}%)."
+        suma_ingresada = sum(inputs_temporales.values())
+
+        if suma_ingresada <= 0:
+          st.error(
+              "La suma de los valores no puede ser cero. Por favor verifique."
           )
-        st.session_state.pesos_ahp = nuevos_pesos
-        st.success(
-            "¡Los pesos AHP se han actualizado correctamente y afectarán los"
-            " próximos cálculos!"
-        )
+        else:
+          # Normalización proporcional automática al 100%
+          pesos_normalizados = {
+              k: v / suma_ingresada for k, v in inputs_temporales.items()
+          }
+          st.session_state.pesos_ahp = pesos_normalizados
+          st.success(
+              "✅ ¡Pesos guardados y normalizados automáticamente al 100% con"
+              " éxito! Ya se aplicarán a todos los cálculos."
+          )
+
+    st.markdown("---")
+    st.markdown("#### 🔍 Estado Actual de los Pesos Vigentes (Suman 100%)")
+    for crit, p_val in st.session_state.pesos_ahp.items():
+      st.markdown(f"- **{crit}:** `{p_val * 100:.2f}%`")
 
   # ------------------------------------------
-  # REGISTRO DE PROYECTOS (SIN PORCENTAJES EN SLIDERS)
+  # REGISTRO DE PROYECTOS
   # ------------------------------------------
   elif menu == "📋 Registro de Proyectos":
     st.markdown(
@@ -546,11 +549,11 @@ else:
       )
       st.markdown(
           "Califique el impacto de la iniciativa en cada uno de los criterios"
-          " corporativos (los pesos se aplican dinámicamente según la"
-          " configuración actual):"
+          " corporativos (los cálculos se realizan utilizando los pesos"
+          " configurados actualmente):"
       )
 
-      # Sliders de evaluación sin porcentajes fijos, usando los pesos dinámicos de st.session_state.pesos_ahp
+      # Sliders de evaluación limpios (sin porcentajes molestos, usando dinámicamente st.session_state.pesos_ahp)
       criterios_keys = list(st.session_state.pesos_ahp.keys())
 
       c1_val = st.slider(f"1. {criterios_keys[0]}", 0, 10, 5, 1)
@@ -576,7 +579,7 @@ else:
       st.markdown(
           f"""
             <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
-                <span style="color: #FFFFFF !important; font-size: 0.95rem;">📊 <b>Puntaje Ponderado AHP Calculado (con pesos vigentes):</b> {score_entero} / 10</span>
+                <span style="color: #FFFFFF !important; font-size: 0.95rem;">📊 <b>Puntaje Ponderado AHP Calculado:</b> {score_entero} / 10</span>
             </div>
             """,
           unsafe_allow_html=True,
