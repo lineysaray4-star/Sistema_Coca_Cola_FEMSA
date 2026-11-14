@@ -49,7 +49,7 @@ try:
 except:
   pass
 
-# Estilos CSS robustos para visibilidad total, textos blancos y corrección de inputs de fecha
+# Estilos CSS robustos para visibilidad total, textos blancos y corrección de fechas/calendarios
 st.markdown(
     f"""
     <style>
@@ -76,6 +76,23 @@ st.markdown(
     }}
     
     [data-baseweb="input"], [data-baseweb="base-input"], [data-testid="stDateInput"] div {{
+        color: #FFFFFF !important;
+    }}
+    
+    /* CORRECCIÓN PARA EL CALENDARIO DESPLEGABLE (BASEWEB) */
+    [data-baseweb="calendar"] *, 
+    [data-baseweb="popover"] *, 
+    [data-baseweb="menu"] * {{
+        color: #FFFFFF !important;
+    }}
+    
+    [data-baseweb="calendar"] [aria-selected="true"] {{
+        background-color: #F40009 !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }}
+    
+    [data-baseweb="calendar"] button {{
         color: #FFFFFF !important;
     }}
     
