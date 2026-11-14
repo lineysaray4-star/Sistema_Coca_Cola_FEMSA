@@ -297,8 +297,9 @@ st.markdown(
 if "autenticado" not in st.session_state:
   st.session_state.autenticado = False
 
-if "lista_proyectos" not in st.session_state:
-  st.session_state.lista_proyectos = []
+# Diccionario para almacenar los proyectos de cada usuario de forma independiente
+if "proyectos_por_usuario" not in st.session_state:
+  st.session_state.proyectos_por_usuario = {}
 
 if "menu_actual" not in st.session_state:
   st.session_state.menu_actual = "🏠 Inicio / Resumen"
@@ -383,7 +384,15 @@ if not st.session_state.autenticado:
       if submitted:
         if usuario.strip() != "" and password == "CocaCola2026":
           st.session_state.autenticado = True
-          st.session_state.usuario_actual = usuario
+          st.session_state.usuario_actual = usuario.strip()
+          # Asegurar que el usuario tenga su lista de proyectos inicializada
+          if (
+              st.session_state.usuario_actual
+              not in st.session_state.proyectos_por_usuario
+          ):
+            st.session_state.proyectos_por_usuario[
+                st.session_state.usuario_actual
+            ] = []
           st.rerun()
         else:
           st.error(
@@ -395,6 +404,12 @@ if not st.session_state.autenticado:
 # 2. APLICACIÓN PRINCIPAL (POST-LOGIN)
 # ==========================================
 else:
+  usuario_actual = st.session_state.usuario_actual
+  # Obtener los proyectos específicos del usuario logueado
+  mis_proyectos = st.session_state.proyectos_por_usuario.setdefault(
+      usuario_actual, []
+  )
+
   with st.sidebar:
     if st.session_state.menu_actual == "🏠 Inicio / Resumen":
       st.image(
@@ -417,7 +432,7 @@ else:
             use_container_width=True,
         )
 
-    st.markdown(f"### 👤 Usuario: **{st.session_state.usuario_actual}**")
+    st.markdown(f"### 👤 Usuario: **{usuario_actual}**")
     st.markdown("---")
 
     menu = st.radio(
@@ -447,21 +462,21 @@ else:
         <div class="dashboard-card">
             <div class="plant-title"><b>Planta {logo_html} FEMSA - <span class="barranquilla-text">Barranquilla</span></b></div>
             <p style="margin-top: 1rem; font-weight: 600; color: #FFFFFF; font-size: 1.1rem;">
-                ¡Bienvenido al sistema!
+                ¡Bienvenido de nuevo, {usuario_actual}!
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    total_proyectos = len(st.session_state.lista_proyectos)
-    presupuesto_total = sum(
-        p.get("capex", 0) for p in st.session_state.lista_proyectos
-    )
+    total_proyectos = len(mis_proyectos)
+    presupuesto_total = sum(p.get("capex", 0) for p in mis_proyectos)
 
     col1, col2, col3 = st.columns(3)
     with col1:
-      st.metric(label="Proyectos Registrados", value=str(total_proyectos))
+      st.metric(
+          label="Tus Proyectos Registrados", value=str(total_proyectos)
+      )
     with col2:
       st.metric(
           label="Presupuesto Asignado ($ USD)",
@@ -669,7 +684,7 @@ else:
     )
     st.markdown("---")
 
-    # Formulario del Brief (Sin mención a ServiceNow)
+    # Formulario del Brief
     with st.form("form_brief_mgip"):
       st.markdown("### 📝 Captura de Brief MGIP")
 
@@ -677,7 +692,7 @@ else:
       with col_a:
         fecha_sol = st.date_input("Fecha de Solicitud")
         nombre_sol = st.text_input(
-            "Nombre del Solicitante", value=st.session_state.usuario_actual
+            "Nombre del Solicitante", value=usuario_actual
         )
         tipo_iniciativa = st.selectbox(
             "Tipo de Iniciativa",
@@ -766,10 +781,10 @@ else:
               "expectativas": expectativas,
               "riesgos": riesgos,
           }
-          st.session_state.lista_proyectos.append(nuevo_proyecto)
+          mis_proyectos.append(nuevo_proyecto)
           st.success(
               f"¡Proyecto '{nomenclatura_generada}' registrado exitosamente"
-              f" con AHP {score_entero}/10!"
+              f" bajo tu usuario y subido al mural!"
           )
 
   # ------------------------------------------
@@ -777,20 +792,22 @@ else:
   # ------------------------------------------
   elif menu == "📌 Mural de Proyectos":
     st.markdown(
-        """
+        f"""
         <div class="dashboard-card">
-            <h2>📌 Mural de Proyectos CAPEX - Planta Barranquilla</h2>
+            <h2>📌 Mural de Proyectos CAPEX - {usuario_actual}</h2>
             <p style="margin-top: 0.5rem; color: #CCCCCC;">
-                Vista general de iniciativas registradas. Descarga el Brief en Excel de cada proyecto directamente desde su tarjeta.
+                Visualiza, descarga el Brief en Excel o elimina tus iniciativas registradas.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    if len(st.session_state.lista_proyectos) > 0:
+    if len(mis_proyectos) > 0:
       cols = st.columns(3)
-      for idx, proj in enumerate(st.session_state.lista_proyectos):
+      indices_a_eliminar = []
+
+      for idx, proj in enumerate(mis_proyectos):
         col_actual = cols[idx % 3]
         with col_actual:
           st.markdown(
@@ -809,7 +826,7 @@ else:
               unsafe_allow_html=True,
           )
 
-          # Botón de descarga en Excel para cada proyecto
+          # Botón de descarga en Excel
           excel_bytes = generar_excel_brief(proj)
           nombre_archivo = (
               f"Brief_MGIP_{proj['nombre'].replace(' ', '_')}.xlsx"
@@ -821,15 +838,32 @@ else:
               mime=(
                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               ),
-              key=f"download_excel_{idx}",
+              key=f"download_excel_{usuario_actual}_{idx}",
           )
+
+          # Botón individual de eliminar este proyecto específico
+          if st.button(
+              f"🗑️ Eliminar #{idx + 1}", key=f"del_proj_{usuario_actual}_{idx}"
+          ):
+            indices_a_eliminar.append(idx)
+
           st.markdown("<br>", unsafe_allow_html=True)
 
-      if st.button("🗑️ Limpiar Todos los Proyectos del Mural"):
-        st.session_state.lista_proyectos = []
+      # Procesar la eliminación si se hizo clic en algún botón de eliminar
+      if indices_a_eliminar:
+        for i in sorted(indices_a_eliminar, reverse=True):
+          mis_proyectos.pop(i)
+        st.rerun()
+
+      st.markdown("---")
+      if st.button("🗑️ Limpiar Todos Mis Proyectos"):
+        st.session_state.proyectos_por_usuario[usuario_actual] = []
         st.rerun()
     else:
-      st.info("📭 El mural está vacío actualmente.")
+      st.info(
+          "📭 Tu mural está vacío actualmente. Ve a la sección '📋 Registro de"
+          " Proyectos' para crear tu primer brief."
+      )
 
   # ------------------------------------------
   # OTROS MÓDULOS
