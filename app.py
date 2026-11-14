@@ -49,7 +49,7 @@ try:
 except:
   pass
 
-# Estilos CSS robustos para el modo oscuro, visibilidad de texto y barras AHP gruesas y de colores
+# Estilos CSS robustos para el modo oscuro, visibilidad total de textos y barras gruesas
 st.markdown(
     f"""
     <style>
@@ -203,9 +203,7 @@ st.markdown(
         color: #FFFFFF !important;
     }}
 
-    /* ==========================================
-       PERSONALIZACIÓN DE BARRAS (SLIDERS) MÁS GRUESAS Y DE COLORES
-       ========================================== */
+    /* Personalización de sliders más gruesos */
     .stSlider [data-baseweb="slider"] {{
         height: 14px !important;
     }}
@@ -213,7 +211,6 @@ st.markdown(
         height: 14px !important;
         border-radius: 7px !important;
     }}
-    /* Colores únicos y distinguibles para cada uno de los 7 sliders */
     div.stSlider:nth-of-type(1) [role="slider"] {{ background-color: #E61C24 !important; border-color: #E61C24 !important; width: 22px !important; height: 22px !important; }}
     div.stSlider:nth-of-type(2) [role="slider"] {{ background-color: #0072B2 !important; border-color: #0072B2 !important; width: 22px !important; height: 22px !important; }}
     div.stSlider:nth-of-type(3) [role="slider"] {{ background-color: #009E73 !important; border-color: #009E73 !important; width: 22px !important; height: 22px !important; }}
@@ -236,7 +233,7 @@ if "lista_proyectos" not in st.session_state:
 if "menu_actual" not in st.session_state:
   st.session_state.menu_actual = "🏠 Inicio / Resumen"
 
-# Valores predeterminados (escala 0-100 basados en los pesos originales de Excel)
+# Valores predeterminados de Excel (escala 0-100)
 VALORES_EXCEL_DEFAULT = {
     "Seguridad y cumplimiento normativo": 31.97,
     "Rentabilidad y optimización de recursos": 20.53,
@@ -247,11 +244,21 @@ VALORES_EXCEL_DEFAULT = {
     "Impacto en el servicio y desarrollo humano": 2.02,
 }
 
-# Inicializar los valores de los sliders en session_state si no existen
+# Inicializar los pesos AHP oficiales guardados en sesión
+if "pesos_ahp" not in st.session_state:
+  suma_def = sum(VALORES_EXCEL_DEFAULT.values())
+  st.session_state.pesos_ahp = {
+      k: v / suma_def for k, v in VALORES_EXCEL_DEFAULT.items()
+  }
+
+# Inicializar los valores temporales de las barras deslizantes en session_state
 for key, default_val in VALORES_EXCEL_DEFAULT.items():
   session_key = f"slider_{key}"
   if session_key not in st.session_state:
-    st.session_state[session_key] = default_val
+    # Cargar el valor correspondiente del peso guardado actual
+    st.session_state[session_key] = float(
+        st.session_state.pesos_ahp[key] * 100
+    )
 
 # Lista oficial de los 20 lugares de la planta
 LUGARES_PLANTA = [
@@ -398,66 +405,83 @@ else:
       st.metric(label="Estado del Sistema", value="Activo")
 
   # ------------------------------------------
-  # CONFIGURACIÓN AHP (BARRAS GRUESAS 0-100 + COLORES ÚNICOS + DONUT CHART)
+  # CONFIGURACIÓN AHP (CON BOTÓN DE GUARDAR Y PREDETERMINADO)
   # ------------------------------------------
   elif menu == "⚙️ Configuración AHP":
     st.markdown(
         """
         <div class="dashboard-card">
-            <h2>⚙️ Configuración y Ponderación Visual de Criterios AHP</h2>
+            <h2>⚙️ Configuración y Ponderación de Criterios AHP</h2>
             <p style="margin-top: 0.8rem; color: #CCCCCC; line-height: 1.6;">
-                <b>Instrucciones:</b> Deslice las barras corporativas en una escala de 0 a 100 para definir el nivel de importancia que considera para cada criterio. Con base en estos valores, el sistema calcula automáticamente el verdadero peso ponderado real (normalizado al 100%) que se aplica en las evaluaciones. <br><br>
-                Si desea volver a los parámetros originales, haga clic en el botón inferior para restaurar instantáneamente los valores predeterminados de Excel en las barras y en el gráfico circular.
+                <b>Instrucciones:</b> Deslice las barras en una escala de 0 a 100 para definir la importancia relativa de cada criterio. Cuando esté lista, haga clic en <b>"💾 Guardar Pesos Seleccionados"</b> para asegurarte de que estos pesos queden guardados permanentemente y se utilicen en las evaluaciones de los proyectos. <br><br>
+                Si lo prefieres, puedes hacer clic en <b>"🔄 Cargar Valores Predeterminados (Excel)"</b> para restaurar instantáneamente los valores base originales.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Botón para cargar los valores predeterminados de Excel y actualizar todo automáticamente
-    if st.button("🔄 Cargar Valores Predeterminados (Excel)"):
-      for key, default_val in VALORES_EXCEL_DEFAULT.items():
-        st.session_state[f"slider_{key}"] = default_val
-      st.success(
-          "¡Valores predeterminados de Excel restaurados con éxito en las"
-          " barras y el gráfico circular!"
-      )
-      st.rerun()
+    # Botones de Acción (Guardar vs Predeterminados)
+    col_b1, col_b2 = st.columns(2)
+    with col_b1:
+      if st.button("💾 Guardar Pesos Seleccionados", use_container_width=True):
+        # Recopilar valores de las barras
+        raw_scores = {}
+        for crit in VALORES_EXCEL_DEFAULT.keys():
+          raw_scores[crit] = st.session_state[f"slider_{crit}"]
+
+        suma_total = sum(raw_scores.values())
+        if suma_total > 0:
+          pesos_normalizados = {k: v / suma_total for k, v in raw_scores.items()}
+        else:
+          pesos_normalizados = {
+              k: 1.0 / len(VALORES_EXCEL_DEFAULT) for k in raw_scores.keys()
+          }
+
+        # Guardar permanentemente en session_state para que persista al cambiar de pantalla
+        st.session_state.pesos_ahp = pesos_normalizados
+        st.success(
+            "✅ ¡Pesos guardados exitosamente! Se mantendrán vigentes al"
+            " navegar por el sistema."
+        )
+
+    with col_b2:
+      if st.button(
+          "🔄 Cargar Valores Predeterminados (Excel)", use_container_width=True
+      ):
+        suma_def = sum(VALORES_EXCEL_DEFAULT.values())
+        st.session_state.pesos_ahp = {
+            k: v / suma_def for k, v in VALORES_EXCEL_DEFAULT.items()
+        }
+        for key, default_val in VALORES_EXCEL_DEFAULT.items():
+          st.session_state[f"slider_{key}"] = default_val
+        st.success("✅ ¡Valores predeterminados de Excel restaurados!")
+        st.rerun()
 
     st.markdown("### 🎚️ Nivel de Importancia por Criterio (0 a 100)")
 
-    # Capturar los valores actuales de las barras desde st.session_state
-    raw_scores = {}
+    # Sliders de 0 a 100 con sus respectivas llaves en session_state
     for crit in VALORES_EXCEL_DEFAULT.keys():
       session_key = f"slider_{crit}"
-      raw_scores[crit] = st.slider(
-          f"{crit}", 0.0, 100.0, float(st.session_state[session_key]), 1.0, key=session_key
-      )
+      st.slider(f"{crit}", 0.0, 100.0, key=session_key, step=1.0)
 
-    # Cálculo automático de los pesos normalizados (verdadero peso ponderado AHP que suma 100%)
-    suma_total = sum(raw_scores.values())
-    if suma_total > 0:
-      pesos_normalizados = {k: v / suma_total for k, v in raw_scores.items()}
+    # Calcular distribución para el gráfico en tiempo real basado en los sliders actuales
+    raw_preview = {
+        crit: st.session_state[f"slider_{crit}"]
+        for crit in VALORES_EXCEL_DEFAULT.keys()
+    }
+    suma_preview = sum(raw_preview.values())
+    if suma_preview > 0:
+      pesos_preview = {k: v / suma_preview for k, v in raw_preview.items()}
     else:
-      pesos_normalizados = {
-          k: 1.0 / len(VALORES_EXCEL_DEFAULT) for k in raw_scores.keys()
-      }
-
-    # Guardar en st.session_state para que la app lo use en las evaluaciones
-    st.session_state.pesos_ahp = pesos_normalizados
+      pesos_preview = st.session_state.pesos_ahp
 
     st.markdown("---")
-    st.markdown("### 📊 Gráfico Circular: Verdadero Peso Ponderado (Suma 100%)")
-    st.markdown(
-        "El siguiente diagrama refleja en tiempo real la distribución"
-        " porcentual calculada a partir de sus ajustes con colores"
-        " altamente distinguibles:"
-    )
+    st.markdown("### 📊 Gráfico Circular: Distribución Ponderada (Suma 100%)")
 
-    # Generar gráfico circular (Dona) con Plotly utilizando la paleta variada corporativa
     df_chart = pd.DataFrame({
-        "Criterio": list(pesos_normalizados.keys()),
-        "Porcentaje Real (%)": [v * 100 for v in pesos_normalizados.values()],
+        "Criterio": list(pesos_preview.keys()),
+        "Porcentaje Real (%)": [v * 100 for v in pesos_preview.values()],
     })
 
     paleta_colores = [
@@ -466,7 +490,7 @@ else:
         "#009E73",  # Verde esmeralda
         "#CC79A7",  # Morado / Magenta
         "#D55E00",  # Naranja intenso
-        "#56B4E9",  # Azul cian claro
+        "#56B4E9",  # Azul cian
         "#F0E442",  # Amarillo brillante
     ]
 
@@ -507,7 +531,6 @@ else:
         unsafe_allow_html=True,
     )
 
-    # Formulario completo Brief MGIP
     with st.form("form_brief_mgip"):
       st.markdown("### 📝 Captura de Brief (Estándar ServiceNow MGIP)")
 
@@ -529,8 +552,6 @@ else:
             ],
         )
         pais_sol = st.text_input("País Solicitante", value="Colombia")
-
-        # Área / Ubicación con los 20 lugares oficiales de la planta
         area_sol = st.selectbox(
             "Área / Ubicación (Planta)", options=LUGARES_PLANTA
         )
@@ -610,16 +631,8 @@ else:
       )
       st.markdown(
           "Califique el impacto de la iniciativa en cada criterio corporativo"
-          " (se aplicarán automáticamente los pesos vigentes configurados en"
-          " la sección AHP):"
+          " usando los pesos guardados:"
       )
-
-      # Asegurar que existan los pesos AHP en session_state
-      if "pesos_ahp" not in st.session_state:
-        suma_def = sum(VALORES_EXCEL_DEFAULT.values())
-        st.session_state.pesos_ahp = {
-            k: v / suma_def for k, v in VALORES_EXCEL_DEFAULT.items()
-        }
 
       criterios_keys = list(st.session_state.pesos_ahp.keys())
 
