@@ -379,7 +379,7 @@ else:
       st.metric(label="Estado del Sistema", value="Activo")
 
   # ------------------------------------------
-  # CONFIGURACIÓN AHP (BARRAS 0-100 + BOTÓN PREDETERMINADO + DONUT CHART)
+  # CONFIGURACIÓN AHP (BARRAS 0-100 + PALETA DE COLORES VARIADA + DONUT CHART)
   # ------------------------------------------
   elif menu == "⚙️ Configuración AHP":
     st.markdown(
@@ -387,7 +387,7 @@ else:
         <div class="dashboard-card">
             <h2>⚙️ Configuración y Ponderación de Criterios AHP</h2>
             <p style="margin-top: 0.8rem; color: #CCCCCC; line-height: 1.6;">
-                <b>Instrucciones:</b> Deslice las barras corporativas para definir el nivel de importancia que considera para cada criterio en una escala de 0 a 100. Con base en estos valores, el sistema calculará automáticamente el peso ponderado real (normalizado al 100%) que se aplicará en las evaluaciones de los proyectos. <br><br>
+                <b>Instrucciones:</b> Deslice las barras corporativas en una escala de 0 a 100 para definir el nivel de importancia que considera para cada criterio. Con base en estos valores, el sistema calculará automáticamente el peso ponderado real (normalizado al 100%) que se aplicará en las evaluaciones de los proyectos. <br><br>
                 Si desea volver a los parámetros originales, haga clic en el botón inferior para restaurar instantáneamente los valores predeterminados de Excel.
             </p>
         </div>
@@ -431,21 +431,32 @@ else:
     st.markdown("### 📊 Gráfico Circular: Verdadero Peso Ponderado (Suma 100%)")
     st.markdown(
         "El siguiente diagrama refleja en tiempo real la distribución"
-        " porcentual calculada a partir de sus ajustes:"
+        " porcentual calculada a partir de sus ajustes con colores"
+        " altamente distinguibles:"
     )
 
-    # Generar gráfico circular (Dona) con Plotly
+    # Generar gráfico circular (Dona) con Plotly utilizando una paleta variada y corporativa (Rojo, Azul, Verde, Morado, Naranja, Cian, Rosa)
     df_chart = pd.DataFrame({
         "Criterio": list(pesos_normalizados.keys()),
         "Porcentaje Real (%)": [v * 100 for v in pesos_normalizados.values()],
     })
+
+    paleta_colores = [
+        "#E61C24",  # Rojo Coca-Cola
+        "#0072B2",  # Azul corporativo
+        "#009E73",  # Verde esmeralda
+        "#CC79A7",  # Morado / Magenta
+        "#D55E00",  # Naranja intenso
+        "#56B4E9",  # Azul cian claro
+        "#F0E442",  # Amarillo brillante
+    ]
 
     fig = px.pie(
         df_chart,
         names="Criterio",
         values="Porcentaje Real (%)",
         hole=0.4,
-        color_discrete_sequence=px.colors.sequential.Reds_r,
+        color_discrete_sequence=paleta_colores,
     )
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
