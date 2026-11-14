@@ -49,7 +49,7 @@ try:
 except:
   pass
 
-# Estilos CSS con la corrección definitiva y directa para la fecha
+# Estilos CSS con la corrección definitiva de opacidad y color para los inputs de fecha
 st.markdown(
     f"""
     <style>
@@ -69,20 +69,19 @@ st.markdown(
         color: #FFFFFF !important;
     }}
     
-    /* CORRECCIÓN RADICAL PARA LA FECHA: Fondo blanco y texto negro súper visible */
-    div.stDateInput div[data-baseweb="input"] {{
-        background-color: #FFFFFF !important;
+    /* CORRECCIÓN DEFINITIVA PARA LA FECHA: Texto blanco puro y opacidad 100% en todos sus segmentos */
+    [data-testid="stDateInput"] input, 
+    [data-testid="stDateInput"] div, 
+    [data-testid="stDateInput"] span {{
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        opacity: 1 !important;
+    }}
+    
+    [data-testid="stDateInput"] > div {{
+        background-color: #1a1c23 !important;
         border: 2px solid #F40009 !important;
-        border-radius: 6px !important;
-    }}
-    div.stDateInput input {{
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-        font-weight: 800 !important;
-    }}
-    div.stDateInput svg {{
-        fill: #111111 !important;
-        color: #111111 !important;
+        border-radius: 8px !important;
     }}
     
     /* Calendario desplegable flotante */
@@ -90,6 +89,7 @@ st.markdown(
     [data-baseweb="popover"] *, 
     [data-baseweb="menu"] * {{
         color: #FFFFFF !important;
+        opacity: 1 !important;
     }}
     
     [data-baseweb="calendar"] [aria-selected="true"] {{
