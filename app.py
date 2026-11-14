@@ -1,6 +1,7 @@
 import base64
-import plotly.express as px
+import io
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 
 # Configuración de la página
@@ -17,6 +18,50 @@ def get_base64_of_bin_file(bin_file):
   with open(bin_file, "rb") as f:
     data = f.read()
   return base64.b64encode(data).decode()
+
+
+# Función para generar el Excel con el Brief del proyecto
+def generar_excel_brief(proj):
+  output = io.BytesIO()
+  with pd.ExcelWriter(output, engine="openpyxl") as writer:
+    data = {
+        "Campo del Brief MGIP": [
+            "Nombre del Requerimiento",
+            "Fecha de Solicitud",
+            "Solicitante",
+            "Tipo de Iniciativa",
+            "Área / Planta",
+            "Año de Ejecución",
+            "Inversión CAPEX (USD)",
+            "Inversión OPEX (USD)",
+            "Puntaje AHP Score",
+            "Antecedentes",
+            "Objetivo",
+            "Descripción del Requerimiento",
+            "Expectativas / Beneficio Esperado",
+            "Riesgos",
+        ],
+        "Detalle del Proyecto": [
+            proj["nombre"],
+            proj["fecha"],
+            proj["solicitante"],
+            proj["tipo"],
+            proj["area"],
+            proj["anio"],
+            proj["capex"],
+            proj["opex"],
+            proj["ahp"],
+            proj["antecedentes"],
+            proj["objetivo"],
+            proj["descripcion"],
+            proj["expectativas"],
+            proj["riesgos"],
+        ],
+    }
+    df = pd.DataFrame(data)
+    df.to_excel(writer, index=False, sheet_name="Brief MGIP")
+  output.seek(0)
+  return output.getvalue()
 
 
 # Cargar la imagen de fondo de la fábrica (fabrica.jpg)
@@ -49,7 +94,7 @@ try:
 except:
   pass
 
-# Estilos CSS con corrección de etiquetas en formularios (texto negro sobre fondo blanco)
+# Estilos CSS con corrección de etiquetas y fecha
 st.markdown(
     f"""
     <style>
@@ -624,7 +669,7 @@ else:
     )
     st.markdown("---")
 
-    # Formulario del Brief (Sin el texto de ServiceNow en el título)
+    # Formulario del Brief (Sin mención a ServiceNow)
     with st.form("form_brief_mgip"):
       st.markdown("### 📝 Captura de Brief MGIP")
 
@@ -736,7 +781,7 @@ else:
         <div class="dashboard-card">
             <h2>📌 Mural de Proyectos CAPEX - Planta Barranquilla</h2>
             <p style="margin-top: 0.5rem; color: #CCCCCC;">
-                Vista general de iniciativas registradas.
+                Vista general de iniciativas registradas. Descarga el Brief en Excel de cada proyecto directamente desde su tarjeta.
             </p>
         </div>
         """,
@@ -763,6 +808,23 @@ else:
                     """,
               unsafe_allow_html=True,
           )
+
+          # Botón de descarga en Excel para cada proyecto
+          excel_bytes = generar_excel_brief(proj)
+          nombre_archivo = (
+              f"Brief_MGIP_{proj['nombre'].replace(' ', '_')}.xlsx"
+          )
+          st.download_button(
+              label="📥 Descargar Brief Excel",
+              data=excel_bytes,
+              file_name=nombre_archivo,
+              mime=(
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              ),
+              key=f"download_excel_{idx}",
+          )
+          st.markdown("<br>", unsafe_allow_html=True)
+
       if st.button("🗑️ Limpiar Todos los Proyectos del Mural"):
         st.session_state.lista_proyectos = []
         st.rerun()
