@@ -49,7 +49,7 @@ try:
 except:
   pass
 
-# Estilos CSS robustos para visibilidad total, textos blancos y corrección de fechas/calendarios
+# Estilos CSS con la corrección definitiva para la fecha
 st.markdown(
     f"""
     <style>
@@ -69,17 +69,23 @@ st.markdown(
         color: #FFFFFF !important;
     }}
     
-    /* CORRECCIÓN TOTAL: Forzar texto blanco en campos de entrada, fecha y números */
-    input, textarea, select, [data-baseweb="input"] input, [data-baseweb="base-input"] input, [data-testid="stDateInput"] input {{
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
+    /* SOLUCIÓN DEFINITIVA PARA LA FECHA: Fondo blanco y texto negro visible */
+    [data-testid="stDateInput"] > div {{
+        background-color: #FFFFFF !important;
+        border-radius: 8px !important;
+        border: 2px solid #F40009 !important;
+    }}
+    [data-testid="stDateInput"] input, 
+    [data-testid="stDateInput"] div, 
+    [data-testid="stDateInput"] span,
+    [data-testid="stDateInput"] svg {{
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+        font-weight: 700 !important;
+        fill: #111111 !important;
     }}
     
-    [data-baseweb="input"], [data-baseweb="base-input"], [data-testid="stDateInput"] div {{
-        color: #FFFFFF !important;
-    }}
-    
-    /* CORRECCIÓN PARA EL CALENDARIO DESPLEGABLE (BASEWEB) */
+    /* Calendario flotante */
     [data-baseweb="calendar"] *, 
     [data-baseweb="popover"] *, 
     [data-baseweb="menu"] * {{
@@ -92,10 +98,6 @@ st.markdown(
         -webkit-text-fill-color: #FFFFFF !important;
     }}
     
-    [data-baseweb="calendar"] button {{
-        color: #FFFFFF !important;
-    }}
-    
     /* Estilizar el formulario nativo de login */
     [data-testid="stForm"] {{
         background: rgba(255, 255, 255, 0.98);
@@ -103,9 +105,6 @@ st.markdown(
         border-radius: 16px;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
         border-top: 6px solid #F40009 !important;
-        border-left: none !important;
-        border-right: none !important;
-        border-bottom: none !important;
         max-width: 420px;
         margin: 0 auto;
     }}
@@ -238,13 +237,6 @@ st.markdown(
         height: 14px !important;
         border-radius: 7px !important;
     }}
-    div.stSlider:nth-of-type(1) [role="slider"] {{ background-color: #E61C24 !important; border-color: #E61C24 !important; width: 22px !important; height: 22px !important; }}
-    div.stSlider:nth-of-type(2) [role="slider"] {{ background-color: #0072B2 !important; border-color: #0072B2 !important; width: 22px !important; height: 22px !important; }}
-    div.stSlider:nth-of-type(3) [role="slider"] {{ background-color: #009E73 !important; border-color: #009E73 !important; width: 22px !important; height: 22px !important; }}
-    div.stSlider:nth-of-type(4) [role="slider"] {{ background-color: #CC79A7 !important; border-color: #CC79A7 !important; width: 22px !important; height: 22px !important; }}
-    div.stSlider:nth-of-type(5) [role="slider"] {{ background-color: #D55E00 !important; border-color: #D55E00 !important; width: 22px !important; height: 22px !important; }}
-    div.stSlider:nth-of-type(6) [role="slider"] {{ background-color: #56B4E9 !important; border-color: #56B4E9 !important; width: 22px !important; height: 22px !important; }}
-    div.stSlider:nth-of-type(7) [role="slider"] {{ background-color: #F0E442 !important; border-color: #F0E442 !important; width: 22px !important; height: 22px !important; }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -271,14 +263,12 @@ VALORES_EXCEL_DEFAULT = {
     "Impacto en el servicio y desarrollo humano": 2.02,
 }
 
-# Inicializar los pesos AHP oficiales guardados en sesión
 if "pesos_ahp" not in st.session_state:
   suma_def = sum(VALORES_EXCEL_DEFAULT.values())
   st.session_state.pesos_ahp = {
       k: v / suma_def for k, v in VALORES_EXCEL_DEFAULT.items()
   }
 
-# Inicializar los valores temporales de las barras deslizantes en session_state
 for key, default_val in VALORES_EXCEL_DEFAULT.items():
   session_key = f"slider_{key}"
   if session_key not in st.session_state:
@@ -286,7 +276,6 @@ for key, default_val in VALORES_EXCEL_DEFAULT.items():
         st.session_state.pesos_ahp[key] * 100
     )
 
-# Lista oficial de los 20 lugares de la planta
 LUGARES_PLANTA = [
     "Nave L6",
     "Ed. Administrativo",
@@ -439,8 +428,7 @@ else:
         <div class="dashboard-card">
             <h2>⚙️ Configuración y Ponderación de Criterios AHP</h2>
             <p style="margin-top: 0.8rem; color: #CCCCCC; line-height: 1.6;">
-                <b>Instrucciones:</b> Deslice las barras en una escala de 0 a 100 para definir la importancia relativa de cada criterio. Cuando esté lista, haga clic en <b>"💾 Guardar Pesos Seleccionados"</b> para asegurarte de que estos pesos queden guardados permanentemente y se utilicen en las evaluaciones de los proyectos. <br><br>
-                Si lo prefiere, puede hacer clic en <b>"🔄 Cargar Valores Predeterminados (Excel)"</b> para restaurar instantáneamente los valores base originales.
+                <b>Instrucciones:</b> Deslice las barras en una escala de 0 a 100 para definir la importancia relativa de cada criterio. Cuando esté lista, haga clic en <b>"💾 Guardar Pesos Seleccionados"</b> para asegurarte de que estos pesos queden guardados permanentemente y se utilicen en las evaluaciones de los proyectos.
             </p>
         </div>
         """,
@@ -463,10 +451,7 @@ else:
           }
 
         st.session_state.pesos_ahp = pesos_normalizados
-        st.success(
-            "✅ ¡Pesos guardados exitosamente! Se mantendrán vigentes al"
-            " navegar por el sistema."
-        )
+        st.success("✅ ¡Pesos guardados exitosamente!")
 
     with col_b2:
       if st.button(
@@ -482,7 +467,6 @@ else:
         st.rerun()
 
     st.markdown("### 🎚️ Nivel de Importancia por Criterio (0 a 100)")
-
     for crit in VALORES_EXCEL_DEFAULT.keys():
       session_key = f"slider_{crit}"
       st.slider(f"{crit}", 0.0, 100.0, key=session_key, step=1.0)
@@ -492,19 +476,18 @@ else:
         for crit in VALORES_EXCEL_DEFAULT.keys()
     }
     suma_preview = sum(raw_preview.values())
-    if suma_preview > 0:
-      pesos_preview = {k: v / suma_preview for k, v in raw_preview.items()}
-    else:
-      pesos_preview = st.session_state.pesos_ahp
+    pesos_preview = (
+        {k: v / suma_preview for k, v in raw_preview.items()}
+        if suma_preview > 0
+        else st.session_state.pesos_ahp
+    )
 
     st.markdown("---")
     st.markdown("### 📊 Gráfico Circular: Distribución Ponderada (Suma 100%)")
-
     df_chart = pd.DataFrame({
         "Criterio": list(pesos_preview.keys()),
         "Porcentaje Real (%)": [v * 100 for v in pesos_preview.values()],
     })
-
     paleta_colores = [
         "#E61C24",
         "#0072B2",
@@ -514,7 +497,6 @@ else:
         "#56B4E9",
         "#F0E442",
     ]
-
     fig = px.pie(
         df_chart,
         names="Criterio",
@@ -552,11 +534,10 @@ else:
         unsafe_allow_html=True,
     )
 
-    # --- NOMENCLATURA FUERA DEL FORMULARIO (ACTUALIZACIÓN EN TIEMPO REAL) ---
+    # Nomenclatura en tiempo real
     st.markdown("### ⚙️ Generación de Nomenclatura del Requerimiento")
     st.markdown(
-        "*Normativa (Máx. 40 caracteres): Acción + Equipo/Zona + Línea + BQA"
-        " (Ej: Reemplazo Compresor L2 BQA)*"
+        "*Normativa (Máx. 40 caracteres): Acción + Equipo/Zona + Línea + BQA*"
     )
 
     col_n1, col_n2, col_n3 = st.columns(3)
@@ -600,15 +581,8 @@ else:
     )
     st.markdown("---")
 
-    # --- EVALUACIÓN AHP FUERA DEL FORMULARIO (CÁLCULO EN TIEMPO REAL) ---
-    st.markdown(
-        "#### 🎯 Evaluación Multicriterio AHP (Puntuación de 0 a 10" " enteros)"
-    )
-    st.markdown(
-        "Califique el impacto de la iniciativa en cada criterio corporativo"
-        " usando los pesos guardados:"
-    )
-
+    # Evaluación AHP en tiempo real
+    st.markdown("#### 🎯 Evaluación Multicriterio AHP (0 a 10 enteros)")
     if "pesos_ahp" not in st.session_state:
       suma_def = sum(VALORES_EXCEL_DEFAULT.values())
       st.session_state.pesos_ahp = {
@@ -616,7 +590,6 @@ else:
       }
 
     criterios_keys = list(st.session_state.pesos_ahp.keys())
-
     c1_val = st.slider(f"1. {criterios_keys[0]}", 0, 10, 5, 1, key="eval_c1")
     c2_val = st.slider(f"2. {criterios_keys[1]}", 0, 10, 5, 1, key="eval_c2")
     c3_val = st.slider(f"3. {criterios_keys[2]}", 0, 10, 5, 1, key="eval_c3")
@@ -626,14 +599,12 @@ else:
     c7_val = st.slider(f"7. {criterios_keys[6]}", 0, 10, 5, 1, key="eval_c7")
 
     pesos_lista = list(st.session_state.pesos_ahp.values())
-    ahp_score_calculado = (
-        (c1_val * pesos_lista[0])
-        + (c2_val * pesos_lista[1])
-        + (c3_val * pesos_lista[2])
-        + (c4_val * pesos_lista[3])
-        + (c5_val * pesos_lista[4])
-        + (c6_val * pesos_lista[5])
-        + (c7_val * pesos_lista[6])
+    ahp_score_calculado = sum(
+        val * peso
+        for val, peso in zip(
+            [c1_val, c2_val, c3_val, c4_val, c5_val, c6_val, c7_val],
+            pesos_lista,
+        )
     )
     score_entero = int(round(ahp_score_calculado))
 
@@ -647,7 +618,7 @@ else:
     )
     st.markdown("---")
 
-    # --- FORMULARIO CON EL RESTO DE CAMPOS DEL BRIEF Y BOTÓN DE ENVÍO ---
+    # Formulario del Brief
     with st.form("form_brief_mgip"):
       st.markdown("### 📝 Captura de Brief (Estándar ServiceNow MGIP)")
 
@@ -701,35 +672,21 @@ else:
       st.markdown("#### 📄 Secciones Descriptivas del Brief")
       antecedentes = st.text_area(
           "Antecedentes",
-          placeholder=(
-              "Describir situación actual, causa del problema, afectación"
-              " al negocio y por qué..."
-          ),
+          placeholder="Describir situación actual y causa del problema...",
       )
       objetivo = st.text_area(
-          "Objetivo",
-          placeholder=(
-              "Indicar propósito a alcanzar y relación con el corredor"
-              " estratégico..."
-          ),
+          "Objetivo", placeholder="Indicar propósito a alcanzar..."
       )
       descripcion_req = st.text_area(
           "Descripción del Requerimiento",
-          placeholder="Qué voy a cambiar y cómo lo quiero resolver...",
+          placeholder="Qué voy a cambiar y cómo...",
       )
       expectativas = st.text_area(
-          "Expectativas / Criterios de Aceptación / Calidad / Beneficio Esperado",
-          placeholder=(
-              "Criterios que definen el éxito del proyecto, impacto en KPIs,"
-              " puesta en marcha..."
-          ),
+          "Expectativas / Criterios de Aceptación",
+          placeholder="Criterios que definen el éxito...",
       )
       riesgos = st.text_area(
-          "Riesgos",
-          placeholder=(
-              "Riesgos detectados (cuantitativos/cualitativos) y qué pasa"
-              " si no se ejecuta el cambio..."
-          ),
+          "Riesgos", placeholder="Riesgos detectados..."
       )
 
       btn_submit_brief = st.form_submit_button("🚀 Enviar Registro")
@@ -761,7 +718,7 @@ else:
           st.session_state.lista_proyectos.append(nuevo_proyecto)
           st.success(
               f"¡Proyecto '{nomenclatura_generada}' registrado exitosamente"
-              f" con AHP {score_entero}/10 y subido al mural!"
+              f" con AHP {score_entero}/10!"
           )
 
   # ------------------------------------------
@@ -773,7 +730,7 @@ else:
         <div class="dashboard-card">
             <h2>📌 Mural de Proyectos CAPEX - Planta Barranquilla</h2>
             <p style="margin-top: 0.5rem; color: #CCCCCC;">
-                Vista general de iniciativas registradas en formato de notas informativas del equipo.
+                Vista general de iniciativas registradas.
             </p>
         </div>
         """,
@@ -796,49 +753,34 @@ else:
                         <p style="font-size: 0.85rem; margin-bottom: 0.3rem;"><b>💰 CAPEX:</b> ${proj['capex']:,.0f}</p>
                         <p style="font-size: 0.85rem; margin-bottom: 0.3rem;"><b>🔧 OPEX:</b> ${proj['opex']:,.0f}</p>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;"><b>🎯 AHP Score:</b> {proj['ahp']} / 10</p>
-                        <details style="font-size: 0.8rem; color: #444;">
-                            <summary style="cursor: pointer; font-weight: bold; color: #F40009;">Ver resumen de Brief</summary>
-                            <p style="margin-top: 0.4rem;"><b>Objetivo:</b> {proj['objetivo'][:120]}...</p>
-                            <p><b>Riesgos:</b> {proj['riesgos'][:120]}...</p>
-                        </details>
                     </div>
                     """,
               unsafe_allow_html=True,
           )
-
-      st.markdown("<br>", unsafe_allow_html=True)
       if st.button("🗑️ Limpiar Todos los Proyectos del Mural"):
         st.session_state.lista_proyectos = []
         st.rerun()
     else:
-      st.info(
-          "📭 El mural está vacío actualmente. Ve a la sección '📋 Registro de"
-          " Proyectos' para capturar el primer brief."
-      )
+      st.info("📭 El mural está vacío actualmente.")
 
   # ------------------------------------------
-  # OPTIMIZACIÓN MULTIPERIODO
+  # OTROS MÓDULOS
   # ------------------------------------------
   elif menu == "⚙️ Optimización Multiperiodo":
     st.markdown(
         """
         <div class="dashboard-card">
             <h2>⚙️ Motor de Optimización Multiperiodo (MILP)</h2>
-            <p style="margin-top: 1rem;">Aquí implementaremos el motor matemático de selección de portafolio y visualización de cronogramas.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-  # ------------------------------------------
-  # REPORTES & BRIEF
-  # ------------------------------------------
   elif menu == "📊 Reportes & Brief":
     st.markdown(
         """
         <div class="dashboard-card">
             <h2>📊 Generación de Reportes y Brief en Excel</h2>
-            <p style="margin-top: 1rem;">Aquí colocaremos el botón de descarga en formato Excel para el brief corporativo.</p>
         </div>
         """,
         unsafe_allow_html=True,
