@@ -49,7 +49,7 @@ try:
 except:
   pass
 
-# Estilos CSS con la corrección definitiva para la fecha
+# Estilos CSS con la corrección definitiva y directa para la fecha
 st.markdown(
     f"""
     <style>
@@ -69,23 +69,23 @@ st.markdown(
         color: #FFFFFF !important;
     }}
     
-    /* SOLUCIÓN DEFINITIVA PARA LA FECHA: Fondo blanco y texto negro visible */
-    [data-testid="stDateInput"] > div {{
+    /* CORRECCIÓN RADICAL PARA LA FECHA: Fondo blanco y texto negro súper visible */
+    div.stDateInput div[data-baseweb="input"] {{
         background-color: #FFFFFF !important;
-        border-radius: 8px !important;
         border: 2px solid #F40009 !important;
+        border-radius: 6px !important;
     }}
-    [data-testid="stDateInput"] input, 
-    [data-testid="stDateInput"] div, 
-    [data-testid="stDateInput"] span,
-    [data-testid="stDateInput"] svg {{
+    div.stDateInput input {{
         color: #111111 !important;
         -webkit-text-fill-color: #111111 !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
+    }}
+    div.stDateInput svg {{
         fill: #111111 !important;
+        color: #111111 !important;
     }}
     
-    /* Calendario flotante */
+    /* Calendario desplegable flotante */
     [data-baseweb="calendar"] *, 
     [data-baseweb="popover"] *, 
     [data-baseweb="menu"] * {{
