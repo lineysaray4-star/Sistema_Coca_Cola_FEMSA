@@ -10,14 +10,14 @@ st.set_page_config(
 )
 
 
-# Función para cargar la imagen local de fondo de forma segura
+# Función para cargar archivos locales en base64 de forma segura
 def get_base64_of_bin_file(bin_file):
   with open(bin_file, "rb") as f:
     data = f.read()
   return base64.b64encode(data).decode()
 
 
-# Intentar cargar la imagen local 'fabrica.jpg'
+# Cargar la imagen de fondo de la fábrica (fabrica.jpg)
 background_css = ""
 try:
   bin_str = get_base64_of_bin_file("fabrica.jpg")
@@ -36,6 +36,14 @@ except:
         background: radial-gradient(circle at center, #1e1e1e 0%, #0d0d0d 100%);
     }}
     """
+
+# Cargar el logo de Coca-Cola (logo_coca.png)
+logo_html = '<span class="coca-cola-font">Coca-Cola</span>'
+try:
+  logo_str = get_base64_of_bin_file("logo_coca.png")
+  logo_html = f'<img src="data:image/png;base64,{logo_str}" style="height: 1.4em; vertical-align: middle; margin: 0 5px; display: inline-block;">'
+except:
+  pass
 
 # Estilos CSS
 st.markdown(
@@ -131,11 +139,11 @@ st.markdown(
         margin-bottom: 1.5rem;
     }}
 
-    .dashboard-card h3, .dashboard-card p {{
+    .dashboard-card h3 {{
         color: #FFFFFF !important;
     }}
 
-    /* Estilos específicos para el título principal sin negrita y con tipografía Coca-Cola */
+    /* Estilos específicos para el título principal */
     .plant-title {{
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-weight: 400 !important;
@@ -152,6 +160,27 @@ st.markdown(
 
     .barranquilla-text {{
         font-size: 0.85em;
+    }}
+
+    /* Estilo profesional para las métricas (números en rojo corporativo) */
+    [data-testid="stMetric"] {{
+        background: rgba(20, 20, 20, 0.85);
+        padding: 1.2rem;
+        border-radius: 12px;
+        border-left: 5px solid #F40009;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }}
+    [data-testid="stMetricLabel"] {{
+        color: #E0E0E0 !important;
+        font-weight: 600 !important;
+    }}
+    [data-testid="stMetricValue"] {{
+        color: #F40009 !important;
+        font-weight: 800 !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    }}
+    [data-testid="stMetricDelta"] {{
+        color: #FFFFFF !important;
     }}
     </style>
     """,
@@ -232,13 +261,12 @@ else:
 
   if menu == "🏠 Inicio / Resumen":
     st.markdown(
-        """
+        f"""
         <div class="dashboard-card">
-            <div class="plant-title">Planta <span class="coca-cola-font">Coca-Cola</span> FEMSA - <span class="barranquilla-text">Barranquilla</span></div>
+            <div class="plant-title">Planta {logo_html} FEMSA - <span class="barranquilla-text">Barranquilla</span></div>
             <h3>Sistema de Soporte a Decisiones (DSS) para Portafolio CAPEX</h3>
-            <p style="margin-top: 1rem; line-height: 1.6;">
-                Bienvenido al sistema gerencial de optimización y priorización de proyectos de inversión. 
-                Utilice el menú lateral para navegar entre el registro de iniciativas, la ejecución del motor de optimización y la generación de reportes para el brief corporativo.
+            <p style="margin-top: 1rem; font-weight: 600; color: #FFFFFF;">
+                ¡Bienvenido al sistema!
             </p>
         </div>
         """,
