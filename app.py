@@ -34,7 +34,7 @@ def generar_excel_brief(proj):
             "Año de Ejecución",
             "Inversión CAPEX (USD)",
             "Inversión OPEX (USD)",
-            "Puntaje AHP Score",
+            "Puntaje AHP Ponderado Score",
             "Antecedentes",
             "Objetivo",
             "Descripción del Requerimiento",
@@ -385,7 +385,6 @@ if not st.session_state.autenticado:
         if usuario.strip() != "" and password == "CocaCola2026":
           st.session_state.autenticado = True
           st.session_state.usuario_actual = usuario.strip()
-          # Asegurar que el usuario tenga su lista de proyectos inicializada
           if (
               st.session_state.usuario_actual
               not in st.session_state.proyectos_por_usuario
@@ -405,7 +404,6 @@ if not st.session_state.autenticado:
 # ==========================================
 else:
   usuario_actual = st.session_state.usuario_actual
-  # Obtener los proyectos específicos del usuario logueado
   mis_proyectos = st.session_state.proyectos_por_usuario.setdefault(
       usuario_actual, []
   )
@@ -647,37 +645,95 @@ else:
     )
     st.markdown("---")
 
-    # Evaluación AHP en tiempo real
-    st.markdown("#### 🎯 Evaluación Multicriterio AHP (0 a 10 enteros)")
+    # Evaluación AHP Ponderada en tiempo real usando los porcentajes guardados
+    st.markdown(
+        "#### 🎯 Evaluación Multicriterio AHP (Ponderada con tus Criterios)"
+    )
+    st.markdown(
+        "<p style='color: #CCCCCC; font-size: 0.9rem;'>Cada"
+        " calificación (0 a 10) se multiplica automáticamente por el"
+        " <b>porcentaje de peso real</b> que definiste en la configuración"
+        " AHP.</p>",
+        unsafe_allow_html=True,
+    )
+
     if "pesos_ahp" not in st.session_state:
       suma_def = sum(VALORES_EXCEL_DEFAULT.values())
       st.session_state.pesos_ahp = {
           k: v / suma_def for k, v in VALORES_EXCEL_DEFAULT.items()
       }
 
-    criterios_keys = list(st.session_state.pesos_ahp.keys())
-    c1_val = st.slider(f"1. {criterios_keys[0]}", 0, 10, 5, 1, key="eval_c1")
-    c2_val = st.slider(f"2. {criterios_keys[1]}", 0, 10, 5, 1, key="eval_c2")
-    c3_val = st.slider(f"3. {criterios_keys[2]}", 0, 10, 5, 1, key="eval_c3")
-    c4_val = st.slider(f"4. {criterios_keys[3]}", 0, 10, 5, 1, key="eval_c4")
-    c5_val = st.slider(f"5. {criterios_keys[4]}", 0, 10, 5, 1, key="eval_c5")
-    c6_val = st.slider(f"6. {criterios_keys[5]}", 0, 10, 5, 1, key="eval_c6")
-    c7_val = st.slider(f"7. {criterios_keys[6]}", 0, 10, 5, 1, key="eval_c7")
+    pesos_actuales = st.session_state.pesos_ahp
+    criterios_keys = list(pesos_actuales.keys())
 
-    pesos_lista = list(st.session_state.pesos_ahp.values())
-    ahp_score_calculado = sum(
-        val * peso
-        for val, peso in zip(
-            [c1_val, c2_val, c3_val, c4_val, c5_val, c6_val, c7_val],
-            pesos_lista,
-        )
+    c1_val = st.slider(
+        f"1. {criterios_keys[0]} (Peso AHP: {pesos_actuales[criterios_keys[0]]*100:.2f}%)",
+        0,
+        10,
+        5,
+        1,
+        key="eval_c1",
     )
+    c2_val = st.slider(
+        f"2. {criterios_keys[1]} (Peso AHP: {pesos_actuales[criterios_keys[1]]*100:.2f}%)",
+        0,
+        10,
+        5,
+        1,
+        key="eval_c2",
+    )
+    c3_val = st.slider(
+        f"3. {criterios_keys[2]} (Peso AHP: {pesos_actuales[criterios_keys[2]]*100:.2f}%)",
+        0,
+        10,
+        5,
+        1,
+        key="eval_c3",
+    )
+    c4_val = st.slider(
+        f"4. {criterios_keys[3]} (Peso AHP: {pesos_actuales[criterios_keys[3]]*100:.2f}%)",
+        0,
+        10,
+        5,
+        1,
+        key="eval_c4",
+    )
+    c5_val = st.slider(
+        f"5. {criterios_keys[4]} (Peso AHP: {pesos_actuales[criterios_keys[4]]*100:.2f}%)",
+        0,
+        10,
+        5,
+        1,
+        key="eval_c5",
+    )
+    c6_val = st.slider(
+        f"6. {criterios_keys[5]} (Peso AHP: {pesos_actuales[criterios_keys[5]]*100:.2f}%)",
+        0,
+        10,
+        5,
+        1,
+        key="eval_c6",
+    )
+    c7_val = st.slider(
+        f"7. {criterios_keys[6]} (Peso AHP: {pesos_actuales[criterios_keys[6]]*100:.2f}%)",
+        0,
+        10,
+        5,
+        1,
+        key="eval_c7",
+    )
+
+    valores_eval = [c1_val, c2_val, c3_val, c4_val, c5_val, c6_val, c7_val]
+    pesos_lista = list(pesos_actuales.values())
+
+    # Cálculo matemático real AHP: Suma( Calificación * Peso Porcentual )
+    ahp_score_calculado = sum(v * p for v, p in zip(valores_eval, pesos_lista))
     score_entero = int(round(ahp_score_calculado))
 
     st.markdown(
         f"""
         <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
-            <span style="color: #FFFFFF !important; font-size: 0.95rem;">📊 <b>Puntaje Ponderado AHP Calculado:</b> {score_entero} / 10</span>
+            <span style="color: #FFFFFF !important; font-size: 0.95rem;">📊 <b>Puntaje Ponderado AHP Calculado (Real con tus Pesos):</b> {score_entero} / 10 <span style="font-size: 0.85rem; color: #AAAAAA;">({ahp_score_calculado:.2f})</span></span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -784,7 +840,7 @@ else:
           mis_proyectos.append(nuevo_proyecto)
           st.success(
               f"¡Proyecto '{nomenclatura_generada}' registrado exitosamente"
-              f" bajo tu usuario y subido al mural!"
+              f" bajo tu usuario con AHP Ponderado de {score_entero}/10!"
           )
 
   # ------------------------------------------
@@ -820,7 +876,7 @@ else:
                         <hr style="margin: 0.5rem 0; border-color: #ddd;">
                         <p style="font-size: 0.85rem; margin-bottom: 0.3rem;"><b>💰 CAPEX:</b> ${proj['capex']:,.0f}</p>
                         <p style="font-size: 0.85rem; margin-bottom: 0.3rem;"><b>🔧 OPEX:</b> ${proj['opex']:,.0f}</p>
-                        <p style="font-size: 0.85rem; margin-bottom: 0.5rem;"><b>🎯 AHP Score:</b> {proj['ahp']} / 10</p>
+                        <p style="font-size: 0.85rem; margin-bottom: 0.5rem;"><b>🎯 AHP Score Ponderado:</b> {proj['ahp']} / 10</p>
                     </div>
                     """,
               unsafe_allow_html=True,
@@ -849,7 +905,6 @@ else:
 
           st.markdown("<br>", unsafe_allow_html=True)
 
-      # Procesar la eliminación si se hizo clic en algún botón de eliminar
       if indices_a_eliminar:
         for i in sorted(indices_a_eliminar, reverse=True):
           mis_proyectos.pop(i)
