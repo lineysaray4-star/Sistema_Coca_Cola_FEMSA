@@ -33,7 +33,7 @@ try:
 except:
   background_css = """
     .stApp {{
-        background: radial-gradient(circle at center, #1e1e1e 0%, #0d0d0d 100%);
+        background: #0e1117;
     }}
     """
 
@@ -45,7 +45,7 @@ try:
 except:
   pass
 
-# Estilos CSS
+# Estilos CSS robustos para bloquear el modo oscuro y asegurar contraste
 st.markdown(
     f"""
     <style>
@@ -57,6 +57,11 @@ st.markdown(
     }}
     
     {background_css}
+    
+    /* Forzar colores de texto generales en blanco */
+    .stMarkdown, p, span, label, h1, h2, h3, h4 {{
+        color: #FFFFFF !important;
+    }}
     
     /* Estilizar el formulario nativo de login */
     [data-testid="stForm"] {{
@@ -72,9 +77,13 @@ st.markdown(
         margin: 0 auto;
     }}
     
+    [data-testid="stForm"] label, [data-testid="stForm"] p, [data-testid="stForm"] span {{
+        color: #333333 !important;
+    }}
+    
     .badge-femsa {{
         background-color: #F40009;
-        color: white;
+        color: white !important;
         padding: 6px 18px;
         border-radius: 8px;
         font-weight: 900;
@@ -139,7 +148,6 @@ st.markdown(
         margin-bottom: 1.5rem;
     }}
 
-    /* Estilos específicos para el título principal en negrita */
     .plant-title {{
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-weight: 700 !important;
@@ -152,7 +160,7 @@ st.markdown(
         font-weight: 700 !important;
     }}
 
-    /* Estilo profesional para las métricas (números en rojo corporativo) */
+    /* Estilo profesional para las métricas */
     [data-testid="stMetric"] {{
         background: rgba(20, 20, 20, 0.85);
         padding: 1.2rem;
@@ -168,6 +176,14 @@ st.markdown(
         color: #F40009 !important;
         font-weight: 800 !important;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    }}
+    
+    /* Barra lateral fija en modo oscuro */
+    [data-testid="stSidebar"] {{
+        background-color: #111111 !important;
+    }}
+    [data-testid="stSidebar"] * {{
+        color: #FFFFFF !important;
     }}
     </style>
     """,
