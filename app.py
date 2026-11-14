@@ -547,7 +547,7 @@ else:
     )
 
     st.markdown("---")
-    st.markdown("### 📊 Gráfico Circular: Distribución Ponderada (Suma 100%)")
+    st.markdown("### 📊 Gráfico Circular")
     df_chart = pd.DataFrame({
         "Criterio": list(pesos_preview.keys()),
         "Porcentaje Real (%)": [v * 100 for v in pesos_preview.values()],
@@ -726,7 +726,6 @@ else:
     valores_eval = [c1_val, c2_val, c3_val, c4_val, c5_val, c6_val, c7_val]
     pesos_lista = list(pesos_actuales.values())
 
-    # Cálculo matemático real AHP: Suma( Calificación * Peso Porcentual )
     ahp_score_calculado = sum(v * p for v, p in zip(valores_eval, pesos_lista))
     score_entero = int(round(ahp_score_calculado))
 
