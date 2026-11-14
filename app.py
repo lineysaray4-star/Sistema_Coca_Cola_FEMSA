@@ -1,676 +1,192 @@
-import base64
-import streamlit as st
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Planta Coca-Cola FEMSA Barranquilla</title>
+  <style>
+    :root { --bg: #eef1f5; --ink: #1f2933; --line: #e1e5ea; }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--ink);
+      overflow: hidden;
+    }
+    header {
+      height: 64px; display: flex; align-items: center; justify-content: center;
+      background: #ffffff; border-bottom: 1px solid var(--line);
+      font-size: 1.25rem; font-weight: 600; letter-spacing: .3px;
+    }
+    #visor { width: 100%; height: calc(100% - 64px); position: relative; }
+    #visor canvas { display: block; }
+    #cargando {
+      position: absolute; inset: 0; display: flex; align-items: center;
+      justify-content: center; color: #6b7785; font-size: 1rem; background: var(--bg); z-index: 10;
+    }
 
-# Configuración de la página
-st.set_page_config(
-    page_title="Coca-Cola FEMSA | DSS CAPEX Barranquilla",
-    page_icon="🏭",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-
-# Función para cargar archivos locales en base64 de forma segura
-def get_base64_of_bin_file(bin_file):
-  with open(bin_file, "rb") as f:
-    data = f.read()
-  return base64.b64encode(data).decode()
-
-
-# Cargar la imagen de fondo de la fábrica (fabrica.jpg)
-background_css = ""
-try:
-  bin_str = get_base64_of_bin_file("fabrica.jpg")
-  background_css = f"""
-    .stApp {{
-        background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), 
-                    url("data:image/jpeg;base64,{bin_str}");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
+    /* Estilos corregidos para los Hotspots interactivos (Letra blanca y fondo de alta visibilidad) */
+    .Hotspot {
+      background: #e61c24;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      height: 14px;
+      width: 14px;
+      padding: 0;
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: transform 0.2s ease, background 0.2s ease;
+      z-index: 5;
+    }
+    .Hotspot:hover {
+      transform: translate(-50%, -50%) scale(1.4);
+      background: #000000;
+    }
+    .HotspotAnnotation {
+      background: rgba(20, 24, 33, 0.9);
+      border-left: 3px solid #e61c24;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 5px 10px;
+      position: absolute;
+      top: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+  </style>
+  <script type="importmap">
+    {"imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
     }}
-    """
-except:
-  background_css = """
-    .stApp {{
-        background: #0e1117;
-    }}
-    """
-
-# Cargar el logo de Coca-Cola (logo_coca.png)
-logo_html = '<span class="coca-cola-font">Coca-Cola</span>'
-logo_base64 = ""
-try:
-  logo_str = get_base64_of_bin_file("logo_coca.png")
-  logo_base64 = logo_str
-  logo_html = f'<img src="data:image/png;base64,{logo_str}" style="height: 1.3em; vertical-align: middle; margin: 0 4px; display: inline-block;">'
-except:
-  pass
-
-# Estilos CSS robustos para el modo oscuro fijo y diseño corporativo
-st.markdown(
-    f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+  </script>
+</head>
+<body>
+  <header>🏭 Planta Coca-Cola FEMSA Barranquilla</header>
+  <div id="visor">
+    <div id="cargando">Cargando modelo y puntos de interés…</div>
     
-    html, body, [class*="css"] {{
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }}
-    
-    {background_css}
-    
-    /* Forzar colores de texto generales en blanco */
-    .stMarkdown, p, span, label, h1, h2, h3, h4 {{
-        color: #FFFFFF !important;
-    }}
-    
-    /* Estilizar el formulario nativo de login */
-    [data-testid="stForm"] {{
-        background: rgba(255, 255, 255, 0.98);
-        padding: 2.2rem;
-        border-radius: 16px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-        border-top: 6px solid #F40009 !important;
-        border-left: none !important;
-        border-right: none !important;
-        border-bottom: none !important;
-        max-width: 420px;
-        margin: 0 auto;
-    }}
-    
-    [data-testid="stForm"] label, [data-testid="stForm"] p, [data-testid="stForm"] span {{
-        color: #333333 !important;
-    }}
-    
-    .badge-femsa {{
-        background-color: #F40009;
-        color: white !important;
-        padding: 6px 18px;
-        border-radius: 8px;
-        font-weight: 900;
-        font-size: 1.1rem;
-        letter-spacing: 1.5px;
-        display: inline-block;
-        margin-bottom: 1.2rem;
-    }}
-    
-    .login-title {{
-        font-weight: 800;
-        color: #FFFFFF !important;
-        font-size: 1.5rem;
-        margin-bottom: 0.4rem;
-        text-align: center;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-    }}
-    
-    .login-subtitle {{
-        color: #FFFFFF !important;
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        text-align: center;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-    }}
-    
-    [data-testid="stFormSubmitButton"] button {{
-        background-color: #F40009 !important;
-        color: white !important;
-        font-weight: 800 !important;
-        border-radius: 8px !important;
-        padding: 0.65rem !important;
-        width: 220px !important;
-        display: block !important;
-        margin: 1.5rem auto 0 auto !important;
-        border: none !important;
-    }}
-    
-    [data-testid="stFormSubmitButton"] button:hover {{
-        background-color: #c50007 !important;
-        box-shadow: 0 4px 12px rgba(244, 0, 9, 0.4);
-    }}
+    <!-- CONTENEDOR DE HOTSPOTS CON COORDENADAS CORREGIDAS -->
+    <div id="hotspots-container">
+      <div class="Hotspot" data-x="0.285" data-y="0.085" data-z="-0.090"><div class="HotspotAnnotation">Nave L6</div></div>
+      <div class="Hotspot" data-x="-0.075" data-y="0.090" data-z="-0.225"><div class="HotspotAnnotation">Ed. Administrativo</div></div>
+      <div class="Hotspot" data-x="-0.012" data-y="0.055" data-z="-0.140"><div class="HotspotAnnotation">Preparación Jarabes</div></div>
+      <div class="Hotspot" data-x="-0.085" data-y="0.074" data-z="0.070"><div class="HotspotAnnotation">Nave L5</div></div>
+      <div class="Hotspot" data-x="0.120" data-y="0.010" data-z="-0.220"><div class="HotspotAnnotation">PTAP</div></div>
+      <div class="Hotspot" data-x="0.175" data-y="0.070" data-z="-0.125"><div class="HotspotAnnotation">Maquinaria Auxiliar</div></div>
+      <div class="Hotspot" data-x="0.160" data-y="0.073" data-z="-0.050"><div class="HotspotAnnotation">Almacén Materia Prima</div></div>
+      <div class="Hotspot" data-x="0.190" data-y="0.034" data-z="0.120"><div class="HotspotAnnotation">Taller de Mantenimiento</div></div>
+      <div class="Hotspot" data-x="0.050" data-y="0.061" data-z="0.110"><div class="HotspotAnnotation">Almacén PT en planta</div></div>
+      <div class="Hotspot" data-x="0.180" data-y="0.040" data-z="0.270"><div class="HotspotAnnotation">Almacén central</div></div>
+      <div class="Hotspot" data-x="0.001" data-y="0.073" data-z="0.045"><div class="HotspotAnnotation">Almacén Seco y Refrigerado</div></div>
+      <div class="Hotspot" data-x="-0.014" data-y="0.041" data-z="-0.230"><div class="HotspotAnnotation">CIP 2</div></div>
+      <div class="Hotspot" data-x="0.098" data-y="0.046" data-z="-0.185"><div class="HotspotAnnotation">Laboratorios</div></div>
+      <div class="Hotspot" data-x="-0.285" data-y="0.112" data-z="0.135"><div class="HotspotAnnotation">Bodega de Almacenamiento</div></div>
+      <div class="Hotspot" data-x="-0.295" data-y="0.086" data-z="-0.095"><div class="HotspotAnnotation">Almacén PT</div></div>
+      <div class="Hotspot" data-x="0.004" data-y="0.056" data-z="0.305"><div class="HotspotAnnotation">Planta de Aguas Residuales</div></div>
+      <div class="Hotspot" data-x="0.042" data-y="0.073" data-z="-0.042"><div class="HotspotAnnotation">Línea San Martín</div></div>
+      <div class="Hotspot" data-x="0.118" data-y="0.073" data-z="-0.050"><div class="HotspotAnnotation">Línea Krones</div></div>
+      <div class="Hotspot" data-x="0.004" data-y="0.073" data-z="-0.055"><div class="HotspotAnnotation">Línea Simonazzi</div></div>
+      <div class="Hotspot" data-x="0.075" data-y="0.073" data-z="-0.070"><div class="HotspotAnnotation">Línea Caraballo</div></div>
+    </div>
+  </div>
 
-    /* Tarjetas contenedoras para el panel principal */
-    .dashboard-card {{
-        background: rgba(20, 20, 20, 0.90);
-        padding: 2rem;
-        border-radius: 14px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        border-left: 6px solid #F40009;
-        margin-bottom: 1.5rem;
-    }}
+  <script type="module">
+    import * as THREE from "three";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-    /* Estilo tipo Post-it / Nota para el Mural */
-    .mural-card {{
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        border-top: 5px solid #F40009;
-        color: #111111 !important;
-        margin-bottom: 1.2rem;
-        height: 100%;
-    }}
-    .mural-card * {{
-        color: #222222 !important;
-    }}
-    .mural-title {{
-        font-weight: 800;
-        font-size: 1.1rem;
-        color: #F40009 !important;
-        margin-bottom: 0.5rem;
-    }}
+    // Configuración básica del visor 3D
+    const container = document.getElementById('visor');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xeef1f5);
 
-    .plant-title {{
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-weight: 700 !important;
-        color: #FFFFFF !important;
-        font-size: 1.8rem;
-    }}
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(0, 1.5, 2.5);
 
-    .barranquilla-text {{
-        font-size: 0.85em;
-        font-weight: 700 !important;
-    }}
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
 
-    /* Estilo profesional para las métricas */
-    [data-testid="stMetric"] {{
-        background: rgba(20, 20, 20, 0.85);
-        padding: 1.2rem;
-        border-radius: 12px;
-        border-left: 5px solid #F40009;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-    }}
-    [data-testid="stMetricLabel"] {{
-        color: #E0E0E0 !important;
-        font-weight: 600 !important;
-    }}
-    [data-testid="stMetricValue"] {{
-        color: #F40009 !important;
-        font-weight: 800 !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-    }}
-    
-    /* Barra lateral fija en modo oscuro */
-    [data-testid="stSidebar"] {{
-        background-color: #111111 !important;
-    }}
-    [data-testid="stSidebar"] * {{
-        color: #FFFFFF !important;
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
-# Inicializar estado de sesión
-if "autenticado" not in st.session_state:
-  st.session_state.autenticado = False
+    // Luz ambiental y direccional para iluminar el modelo
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    scene.add(ambientLight);
 
-if "lista_proyectos" not in st.session_state:
-  st.session_state.lista_proyectos = []
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    dirLight.position.set(5, 10, 7);
+    scene.add(dirLight);
 
-if "menu_actual" not in st.session_state:
-  st.session_state.menu_actual = "🏠 Inicio / Resumen"
+    // Cargar modelo GLB incorporado
+    const glbData = "data:model/gltf-binary;base64,Z2xURgIAAAC06zMBwAQAAEpTT057ImJ1ZmZlclZpZXdzIjpbeyJidWZmZXIiOjAsImJ5dGVPZmZzZXQiOjAsImJ5dGVMZW5ndGgiOjg2NDc5OTIsInRhcmdldCI6MzQ5NjIsImJ5dGVTdHJpZGUiOjEyfSx7ImJ1ZmZlciI6MCwiYnl0ZU9mZnNldCI6ODY0Nzk5MiwiYnl0ZUxlbmd0aCI6Mjg4MjY2NCwidGFyZ2V0IjozNDk2M30seyJidWZmZXIiOjAsImJ5dGVPZmZzZXQiOjExNTMwNjU2LCJieXRlTGVuZ3RoIjo4NjQ3OTkyLCJ0YXJnZXQiOjM0OTYyLCJieXRlU3RyaWRlIjoxMn1dLCJhY2Nlc3NvcnMiOlt7ImJ1ZmZlclZpZXciOjAsImNvbXBvbmVudFR5cGUiOjUxMjYsImNvdW50Ijo3MjA2NjYsIm1heCI6WzAuNDAxLDAuNDg2LDAuMTEzXSwibWluIjpbLTAuNDAxMDE2MDEsLTAuNDA3NzAyLC0wLjAwNjY1ODAwMDAwMDAwMDAwMV0sInR5cGUiOiJWRUMzIn0seyJidWZmZXIiOjEsImNvbXBvbmVudFR5cGUiOjUxMjUsImNvdW50Ijo3MjA2NjYsIm1heCI6WzcyMDY2NV0sIm1pbiI6WzBdLCJ0eXBlIjoiU0NBTEFSIn0seyJidWZmZXIiOjIsImNvbXBvbmVudFR5cGUiOjUxMjYsImNvdW50Ijo3MjA2NjYsIm1heCI6WzEsMC45ODAzOTIxNTY4NjI3NDUxLDAuOTgwMzkyMTU2ODYyNzQ1MV0sIm1pbiI6WzAsMC4wNDMxMzcyNTQ5MDE5NjA3ODQsMC4wODYyNzQ1MDk4MDM5MjE1N10sInR5cGUiOiJWRUMzIn1dLCJhc3NldCI6eyJ2ZXJzaW9uIjoiMi4wIiwiZ2VuZXJhdG9yIjoiQXV0b2Rlc2suVGlua2VyY2FkIn0sIm1hdGVyaWFscyI6W3sicGJyTWV0YWxsaWNSb3VnaG5lc3MiOnsibWV0YWxsaWNGYWN0b3IiOjAuNSwicm91Z2huZXNzRmFjdG9yIjowLjV9LCJuYW1lIjoibGFtYmVydDIwU0cuMDAxIn1dLCJtZXNoZXMiOlt7InByaW1pdGl2ZXMiOlt7Im1vZGUiOjQsImF0dHJpYnV0ZXMiOnsiUE9TSVRJT04iOjAsIkNPTExPUl8wIjoyfSwiaW5kaWNlcyI6MSwibWF0ZXJpYWwiOjB9XX1dLCJzY2VuZXMiOlt7Im5vZGVzIjpbMV0sIm5hbWUiOiJUaW5rZXJjYWQgR0xURiBTY2VuZSJ9XSwic2NlbmUiOjAsIm5vZGVzIjpbeyJuYW1lIjoiTWVzaF9NZXNoX2hlYzdfZ2VvLjAwMV9sYW1iZXJ0MlNHLjAwMSIsIm1lc2giOjB9LHsibWF0cml4IjpbMSwwLDAsMCwwLDIuMjIwNDQ2MDQ5MjUwMzEzZS0xNSwtMSwwLDAsMSwyLjIyMDQ0NjA0OTI1MDMxM2UtMTYsMCwwLDAsMCwxXSwiY2hpbGRyZW4iOlswXX1dLCJidWZmZXJzIjpbeyJieXRlTGVuZ3RoIjoyMDE3ODY0OH1dfSA=";
 
-# ==========================================
-# 1. PANTALLA DE LOGIN
-# ==========================================
-if not st.session_state.autenticado:
-  col1, col2, col3 = st.columns([1, 1.4, 1])
+    const loader = new GLTFLoader();
+    const binaryString = atob(glbData.split(',')[1]);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
 
-  with col2:
-    st.markdown(
-        '<p class="login-title">SISTEMA DE SOPORTE A DECISIONES</p>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<p class="login-subtitle">Planta Barranquilla | Módulo CAPEX</p>',
-        unsafe_allow_html=True,
-    )
+    loader.parse(bytes.buffer, '', (gltf) => {
+      scene.add(gltf.scene);
+      document.getElementById('cargando').style.display = 'none';
+    }, (error) => {
+      console.error(error);
+      document.getElementById('cargando').textContent = 'Error al cargar el modelo 3D.';
+    });
 
-    with st.form("login_form"):
-      st.markdown(
-          '<div style="text-align: center;"><span'
-          ' class="badge-femsa">COCA-COLA FEMSA</span></div>',
-          unsafe_allow_html=True,
-      )
+    // Posicionamiento dinámico de los hotspots basados en las coordenadas 3D
+    const hotspots = document.querySelectorAll('.Hotspot');
+    const vector = new THREE.Vector3();
 
-      usuario = st.text_input("Usuario", placeholder="Ej. Ing. Alejandra")
-      password = st.text_input(
-          "Contraseña", type="password", placeholder="••••••••"
-      )
+    function actualizarHotspots() {
+      hotspots.forEach(hotspot => {
+        const x = parseFloat(hotspot.dataset.x);
+        const y = parseFloat(hotspot.dataset.y);
+        const z = parseFloat(hotspot.dataset.z);
+        
+        vector.set(x, y, z);
+        vector.project(camera);
 
-      submitted = st.form_submit_button("INICIAR SESIÓN")
+        const xCoord = (vector.x *  .5 + .5) * container.clientWidth;
+        const yCoord = (vector.y * -.5 + .5) * container.clientHeight;
 
-      if submitted:
-        if usuario.strip() != "" and password == "CocaCola2026":
-          st.session_state.autenticado = True
-          st.session_state.usuario_actual = usuario
-          st.rerun()
-        else:
-          st.error(
-              "Credenciales incorrectas. Verifique que la contraseña sea"
-              " CocaCola2026."
-          )
+        if (vector.z < 1) {
+          hotspot.style.display = 'block';
+          hotspot.style.left = `${xCoord}px`;
+          hotspot.style.top = `${yCoord}px`;
+        } else {
+          hotspot.style.display = 'none';
+        }
+      });
+    }
 
-# ==========================================
-# 2. APLICACIÓN PRINCIPAL (POST-LOGIN)
-# ==========================================
-else:
-  with st.sidebar:
-    # 1. Imagen arriba del todo en la barra lateral
-    if st.session_state.menu_actual == "🏠 Inicio / Resumen":
-      st.image(
-          "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&auto=format&fit=crop&q=80",
-          use_container_width=True,
-      )
-    else:
-      if logo_base64:
-        st.markdown(
-            f"""
-                <div style="text-align: center; padding: 0.2rem 0 0.8rem 0;">
-                    <img src="data:image/png;base64,{logo_base64}" style="width: 90%; max-width: 190px;">
-                </div>
-                """,
-            unsafe_allow_html=True,
-        )
-      else:
-        st.image(
-            "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&auto=format&fit=crop&q=80",
-            use_container_width=True,
-        )
+    controls.addEventListener('change', actualizarHotspots);
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      actualizarHotspots();
+    });
 
-    st.markdown(f"### 👤 Usuario: **{st.session_state.usuario_actual}**")
-    st.markdown("---")
-
-    menu = st.radio(
-        "Navegación del Sistema",
-        [
-            "🏠 Inicio / Resumen",
-            "📋 Registro de Proyectos",
-            "📌 Mural de Proyectos",
-            "⚙️ Optimización Multiperiodo",
-            "📊 Reportes & Brief",
-        ],
-        key="menu_actual",
-    )
-
-    st.markdown("---")
-    if st.button("🚪 Cerrar Sesión"):
-      st.session_state.autenticado = False
-      st.rerun()
-
-  # ------------------------------------------
-  # INICIO / RESUMEN
-  # ------------------------------------------
-  if menu == "🏠 Inicio / Resumen":
-    st.markdown(
-        f"""
-        <div class="dashboard-card">
-            <div class="plant-title"><b>Planta {logo_html} FEMSA - <span class="barranquilla-text">Barranquilla</span></b></div>
-            <p style="margin-top: 1rem; font-weight: 600; color: #FFFFFF; font-size: 1.1rem;">
-                ¡Bienvenido al sistema!
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    total_proyectos = len(st.session_state.lista_proyectos)
-    presupuesto_total = sum(
-        p.get("capex", 0) for p in st.session_state.lista_proyectos
-    )
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-      st.metric(label="Proyectos Registrados", value=str(total_proyectos))
-    with col2:
-      st.metric(
-          label="Presupuesto Asignado ($ USD)",
-          value=f"${presupuesto_total:,.0f}".replace(",", "."),
-      )
-    with col3:
-      st.metric(label="Estado del Sistema", value="Activo")
-
-  # ------------------------------------------
-  # REGISTRO DE PROYECTOS (BRIEF MGIP + AHP 0-10 ENTEROS)
-  # ------------------------------------------
-  elif menu == "📋 Registro de Proyectos":
-    st.markdown(
-        """
-        <div class="dashboard-card">
-            <h2>Registro y Gestión de Proyectos CAPEX</h2>
-            <p style="margin-top: 0.5rem; color: #CCCCCC;">
-                Complete el formulario de Brief MGIP corporativo y evalúe los criterios AHP de la iniciativa.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # Formulario completo Brief MGIP
-    with st.form("form_brief_mgip"):
-      st.markdown("### 📝 Captura de Brief (Estándar ServiceNow MGIP)")
-
-      col_a, col_b = st.columns(2)
-      with col_a:
-        fecha_sol = st.date_input("Fecha de Solicitud")
-        nombre_sol = st.text_input(
-            "Nombre del Solicitante", value=st.session_state.usuario_actual
-        )
-        tipo_iniciativa = st.selectbox(
-            "Tipo de Iniciativa",
-            [
-                "Renovación por Obsolescencia",
-                "Upgrade / Actualización Electrónica",
-                "Seguridad, Calidad & Ambiental",
-                "Infraestructura / Facilities",
-                "ESG / Sostenibilidad",
-                "Productividad / Incremento de Capacidad",
-            ],
-        )
-        pais_sol = st.text_input("País Solicitante", value="Colombia")
-        area_sol = st.selectbox(
-            "Área / Ubicación (Modelo 3D Planta)",
-            [
-                "Línea 1 (L1)",
-                "Línea 2 (L2)",
-                "Línea 3 (L3)",
-                "Línea 4 (L4)",
-                "Soplado",
-                "Embotellado / Llenadora",
-                "Paletizado / Empacadora",
-                "Jarabe / Preparación",
-                "Almacén / Bodega",
-                "Servicios Industriales (SCI)",
-                "Tratamiento de Agua",
-            ],
-        )
-
-      with col_b:
-        anio_ejec = st.selectbox("Año de Ejecución", [2026, 2027, 2028])
-        prioridad_est = st.selectbox(
-            "Prioridades Estratégicas (Pilar)",
-            [
-                "Continuidad Operativa",
-                "Eficiencia y Rentabilidad",
-                "Seguridad y Sostenibilidad KORE",
-            ],
-        )
-        incluida_bp = st.checkbox("¿Incluida en BP Nueva Iniciativa?")
-        capex_usd = st.number_input(
-            "Inversión Inicial Aproximada CAPEX (USD)",
-            min_value=0.0,
-            step=5000.0,
-            value=0.0,
-        )
-        opex_usd = st.number_input(
-            "Inversión Inicial Aproximada OPEX (USD)",
-            min_value=0.0,
-            step=1000.0,
-            value=0.0,
-        )
-
-      st.markdown("---")
-      st.markdown("#### ⚙️ Generación de Nomenclatura del Requerimiento")
-      st.markdown(
-          "*Normativa (Máx. 40 caracteres): Acción + Equipo/Zona + Línea + BQA"
-          " (Ej: Reemplazo Compresor L2 BQA)*"
-      )
-
-      col_n1, col_n2, col_n3 = st.columns(3)
-      with col_n1:
-        accion_nom = st.selectbox(
-            "Acción",
-            [
-                "Reemplazo",
-                "Adecuación",
-                "Ampliación",
-                "Adquisición",
-                "Instalación",
-                "Reingeniería",
-            ],
-        )
-      with col_n2:
-        equipo_nom = st.text_input(
-            "Equipo / Zona / Detalle", placeholder="Ej. Compresor Amoniaco"
-        )
-      with col_n3:
-        linea_nom = st.selectbox(
-            "Línea", ["L1", "L2", "L3", "L4", "General"]
-        )
-
-      nomenclatura_generada = (
-          f"{accion_nom} {equipo_nom} {linea_nom} BQA"[:40]
-          if equipo_nom.strip()
-          else "Pendiente de definir"
-      )
-
-      st.markdown(
-          f"""
-            <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
-                <span style="color: #FFFFFF !important; font-size: 0.95rem;">📌 <b>Nombre del Requerimiento Resultante:</b> {nomenclatura_generada}</span>
-            </div>
-            """,
-          unsafe_allow_html=True,
-      )
-
-      st.markdown("---")
-      st.markdown(
-          "#### 🎯 Evaluación Multicriterio AHP (Puntuación de 0 a 10"
-          " enteros)"
-      )
-      st.markdown(
-          "Califique el impacto de la iniciativa en cada uno de los 7"
-          " criterios corporativos ponderados:"
-      )
-
-      c1 = st.slider(
-          "1. Seguridad y cumplimiento normativo (Peso: 31.97%)", 0, 10, 5, 1
-      )
-      c2 = st.slider(
-          "2. Rentabilidad y optimización de recursos (Peso: 20.53%)",
-          0,
-          10,
-          5,
-          1,
-      )
-      c3 = st.slider(
-          "3. Continuidad operativa y salud de activos (Peso: 18.94%)",
-          0,
-          10,
-          5,
-          1,
-      )
-      c4 = st.slider(
-          "4. Alineación estratégica y LRP (Peso: 13.99%)", 0, 10, 5, 1
-      )
-      c5 = st.slider(
-          "5. Gestión de riesgos técnicos y operacionales (Peso: 8.72%)",
-          0,
-          10,
-          5,
-          1,
-      )
-      c6 = st.slider(
-          "6. Complejidad y desafíos de ejecución técnica (Peso: 3.83%)",
-          0,
-          10,
-          5,
-          1,
-      )
-      c7 = st.slider(
-          "7. Impacto en el servicio y desarrollo humano (Peso: 2.02%)",
-          0,
-          10,
-          5,
-          1,
-      )
-
-      ahp_score_calculado = (
-          (c1 * 0.3197)
-          + (c2 * 0.2053)
-          + (c3 * 0.1894)
-          + (c4 * 0.1399)
-          + (c5 * 0.0872)
-          + (c6 * 0.0383)
-          + (c7 * 0.0202)
-      )
-      score_entero = int(round(ahp_score_calculado))
-
-      st.markdown(
-          f"""
-            <div style="background: rgba(30, 30, 30, 0.95); padding: 0.8rem 1rem; border-radius: 8px; border-left: 4px solid #F40009; margin: 0.5rem 0 1rem 0;">
-                <span style="color: #FFFFFF !important; font-size: 0.95rem;">📊 <b>Puntaje Ponderado AHP Calculado:</b> {score_entero} / 10</span>
-            </div>
-            """,
-          unsafe_allow_html=True,
-      )
-
-      st.markdown("---")
-      st.markdown("#### 📄 Secciones Descriptivas del Brief")
-      antecedentes = st.text_area(
-          "Antecedentes",
-          placeholder=(
-              "Describir situación actual, causa del problema, afectación"
-              " al negocio y por qué..."
-          ),
-      )
-      objetivo = st.text_area(
-          "Objetivo",
-          placeholder=(
-              "Indicar propósito a alcanzar y relación con el corredor"
-              " estratégico..."
-          ),
-      )
-      descripcion_req = st.text_area(
-          "Descripción del Requerimiento",
-          placeholder="Qué voy a cambiar y cómo lo quiero resolver...",
-      )
-      expectativas = st.text_area(
-          "Expectativas / Criterios de Aceptación / Calidad / Beneficio Esperado",
-          placeholder=(
-              "Criterios que definen el éxito del proyecto, impacto en KPIs,"
-              " puesta en marcha..."
-          ),
-      )
-      riesgos = st.text_area(
-          "Riesgos",
-          placeholder=(
-              "Riesgos detectados (cuantitativos/cualitativos) y qué pasa"
-              " si no se ejecuta el cambio..."
-          ),
-      )
-
-      btn_submit_brief = st.form_submit_button("🚀 Enviar Registro")
-
-      if btn_submit_brief:
-        if not equipo_nom.strip():
-          st.error(
-              "Por favor indique el equipo o detalle para la nomenclatura."
-          )
-        elif capex_usd <= 0:
-          st.error("El monto CAPEX debe ser mayor a 0.")
-        else:
-          nuevo_proyecto = {
-              "nombre": nomenclatura_generada,
-              "fecha": str(fecha_sol),
-              "solicitante": nombre_sol,
-              "tipo": tipo_iniciativa,
-              "area": area_sol,
-              "anio": anio_ejec,
-              "capex": capex_usd,
-              "opex": opex_usd,
-              "ahp": score_entero,
-              "antecedentes": antecedentes,
-              "objetivo": objetivo,
-              "descripcion": descripcion_req,
-              "expectativas": expectativas,
-              "riesgos": riesgos,
-          }
-          st.session_state.lista_proyectos.append(nuevo_proyecto)
-          st.success(
-              f"¡Proyecto '{nomenclatura_generada}' registrado exitosamente"
-              f" con AHP {score_entero}/10 y subido al mural!"
-          )
-
-  # ------------------------------------------
-  # MURAL DE PROYECTOS
-  # ------------------------------------------
-  elif menu == "📌 Mural de Proyectos":
-    st.markdown(
-        """
-        <div class="dashboard-card">
-            <h2>📌 Mural de Proyectos CAPEX - Planta Barranquilla</h2>
-            <p style="margin-top: 0.5rem; color: #CCCCCC;">
-                Vista general de iniciativas registradas en formato de notas informativas del equipo.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    if len(st.session_state.lista_proyectos) > 0:
-      cols = st.columns(3)
-      for idx, proj in enumerate(st.session_state.lista_proyectos):
-        col_actual = cols[idx % 3]
-        with col_actual:
-          st.markdown(
-              f"""
-                    <div class="mural-card">
-                        <div class="mural-title">#{idx + 1} | {proj['nombre']}</div>
-                        <p style="font-size: 0.85rem; margin-bottom: 0.4rem;"><b>📅 Fecha:</b> {proj['fecha']} ({proj['anio']})</p>
-                        <p style="font-size: 0.85rem; margin-bottom: 0.4rem;"><b>👤 Solicitante:</b> {proj['solicitante']}</p>
-                        <p style="font-size: 0.85rem; margin-bottom: 0.4rem;"><b>📍 Área:</b> {proj['area']}</p>
-                        <hr style="margin: 0.5rem 0; border-color: #ddd;">
-                        <p style="font-size: 0.85rem; margin-bottom: 0.3rem;"><b>💰 CAPEX:</b> ${proj['capex']:,.0f}</p>
-                        <p style="font-size: 0.85rem; margin-bottom: 0.3rem;"><b>🔧 OPEX:</b> ${proj['opex']:,.0f}</p>
-                        <p style="font-size: 0.85rem; margin-bottom: 0.5rem;"><b>🎯 AHP Score:</b> {proj['ahp']} / 10</p>
-                        <details style="font-size: 0.8rem; color: #444;">
-                            <summary style="cursor: pointer; font-weight: bold; color: #F40009;">Ver resumen de Brief</summary>
-                            <p style="margin-top: 0.4rem;"><b>Objetivo:</b> {proj['objetivo'][:120]}...</p>
-                            <p><b>Riesgos:</b> {proj['riesgos'][:120]}...</p>
-                        </details>
-                    </div>
-                    """,
-              unsafe_allow_html=True,
-          )
-
-      st.markdown("<br>", unsafe_allow_html=True)
-      if st.button("🗑️ Limpiar Todos los Proyectos del Mural"):
-        st.session_state.lista_proyectos = []
-        st.rerun()
-    else:
-      st.info(
-          "📭 El mural está vacío actualmente. Ve a la sección '📋 Registro de"
-          " Proyectos' para capturar el primer brief."
-      )
-
-  # ------------------------------------------
-  # OPTIMIZACIÓN MULTIPERIODO
-  # ------------------------------------------
-  elif menu == "⚙️ Optimización Multiperiodo":
-    st.markdown(
-        """
-        <div class="dashboard-card">
-            <h2>⚙️ Motor de Optimización Multiperiodo (MILP)</h2>
-            <p style="margin-top: 1rem;">Aquí implementaremos el motor matemático de selección de portafolio y visualización de cronogramas.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-  # ------------------------------------------
-  # REPORTES & BRIEF
-  # ------------------------------------------
-  elif menu == "📊 Reportes & Brief":
-    st.markdown(
-        """
-        <div class="dashboard-card">
-            <h2>📊 Generación de Reportes y Brief en Excel</h2>
-            <p style="margin-top: 1rem;">Aquí colocaremos el botón de descarga en formato Excel para el brief corporativo.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+      actualizarHotspots();
+    }
+    animate();
+  </script>
+</body>
+</html>
