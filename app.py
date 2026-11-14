@@ -37,11 +37,12 @@ except:
     }}
     """
 
-# Estilos CSS robustos para un manejo de colores impecable en cualquier fondo
+# Estilos CSS
 st.markdown(
     f"""
     <style>
     @import url('https://fonts.googleapis.com/css?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
     
     html, body, [class*="css"] {{
         font-family: 'Plus Jakarta Sans', sans-serif !important;
@@ -120,7 +121,7 @@ st.markdown(
         fill: #555555 !important;
     }}
 
-    /* Tarjetas contenedoras para el panel principal (garantizan legibilidad total en cualquier fondo) */
+    /* Tarjetas contenedoras para el panel principal */
     .dashboard-card {{
         background: rgba(20, 20, 20, 0.85);
         padding: 2.2rem;
@@ -130,8 +131,27 @@ st.markdown(
         margin-bottom: 1.5rem;
     }}
 
-    .dashboard-card h1, .dashboard-card h2, .dashboard-card h3, .dashboard-card p {{
+    .dashboard-card h3, .dashboard-card p {{
         color: #FFFFFF !important;
+    }}
+
+    /* Estilos específicos para el título principal sin negrita y con tipografía Coca-Cola */
+    .plant-title {{
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 400 !important;
+        color: #FFFFFF !important;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }}
+
+    .coca-cola-font {{
+        font-family: 'Pacifico', cursive !important;
+        font-weight: 400 !important;
+        color: #F40009;
+    }}
+
+    .barranquilla-text {{
+        font-size: 0.85em;
     }}
     </style>
     """,
@@ -210,12 +230,11 @@ else:
       st.session_state.autenticado = False
       st.rerun()
 
-  # Contenido envuelto en tarjetas profesionales para garantizar alto contraste y legibilidad absoluta
   if menu == "🏠 Inicio / Resumen":
     st.markdown(
         """
         <div class="dashboard-card">
-            <h1>🏭 Planta Coca-Cola FEMSA - Barranquilla</h1>
+            <div class="plant-title">Planta <span class="coca-cola-font">Coca-Cola</span> FEMSA - <span class="barranquilla-text">Barranquilla</span></div>
             <h3>Sistema de Soporte a Decisiones (DSS) para Portafolio CAPEX</h3>
             <p style="margin-top: 1rem; line-height: 1.6;">
                 Bienvenido al sistema gerencial de optimización y priorización de proyectos de inversión. 
