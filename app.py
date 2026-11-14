@@ -49,7 +49,7 @@ try:
 except:
   pass
 
-# Estilos CSS robustos para el modo oscuro fijo y visibilidad total de textos
+# Estilos CSS robustos para el modo oscuro, visibilidad de texto y barras AHP gruesas y de colores
 st.markdown(
     f"""
     <style>
@@ -202,6 +202,25 @@ st.markdown(
     [data-testid="stSidebar"] * {{
         color: #FFFFFF !important;
     }}
+
+    /* ==========================================
+       PERSONALIZACIÓN DE BARRAS (SLIDERS) MÁS GRUESAS Y DE COLORES
+       ========================================== */
+    .stSlider [data-baseweb="slider"] {{
+        height: 14px !important;
+    }}
+    .stSlider [data-baseweb="slider"] > div {{
+        height: 14px !important;
+        border-radius: 7px !important;
+    }}
+    /* Colores únicos y distinguibles para cada uno de los 7 sliders */
+    div.stSlider:nth-of-type(1) [role="slider"] {{ background-color: #E61C24 !important; border-color: #E61C24 !important; width: 22px !important; height: 22px !important; }}
+    div.stSlider:nth-of-type(2) [role="slider"] {{ background-color: #0072B2 !important; border-color: #0072B2 !important; width: 22px !important; height: 22px !important; }}
+    div.stSlider:nth-of-type(3) [role="slider"] {{ background-color: #009E73 !important; border-color: #009E73 !important; width: 22px !important; height: 22px !important; }}
+    div.stSlider:nth-of-type(4) [role="slider"] {{ background-color: #CC79A7 !important; border-color: #CC79A7 !important; width: 22px !important; height: 22px !important; }}
+    div.stSlider:nth-of-type(5) [role="slider"] {{ background-color: #D55E00 !important; border-color: #D55E00 !important; width: 22px !important; height: 22px !important; }}
+    div.stSlider:nth-of-type(6) [role="slider"] {{ background-color: #56B4E9 !important; border-color: #56B4E9 !important; width: 22px !important; height: 22px !important; }}
+    div.stSlider:nth-of-type(7) [role="slider"] {{ background-color: #F0E442 !important; border-color: #F0E442 !important; width: 22px !important; height: 22px !important; }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -379,16 +398,16 @@ else:
       st.metric(label="Estado del Sistema", value="Activo")
 
   # ------------------------------------------
-  # CONFIGURACIÓN AHP (BARRAS 0-100 + PALETA DE COLORES VARIADA + DONUT CHART)
+  # CONFIGURACIÓN AHP (BARRAS GRUESAS 0-100 + COLORES ÚNICOS + DONUT CHART)
   # ------------------------------------------
   elif menu == "⚙️ Configuración AHP":
     st.markdown(
         """
         <div class="dashboard-card">
-            <h2>⚙️ Configuración y Ponderación de Criterios AHP</h2>
+            <h2>⚙️ Configuración y Ponderación Visual de Criterios AHP</h2>
             <p style="margin-top: 0.8rem; color: #CCCCCC; line-height: 1.6;">
-                <b>Instrucciones:</b> Deslice las barras corporativas en una escala de 0 a 100 para definir el nivel de importancia que considera para cada criterio. Con base en estos valores, el sistema calculará automáticamente el peso ponderado real (normalizado al 100%) que se aplicará en las evaluaciones de los proyectos. <br><br>
-                Si desea volver a los parámetros originales, haga clic en el botón inferior para restaurar instantáneamente los valores predeterminados de Excel.
+                <b>Instrucciones:</b> Deslice las barras corporativas en una escala de 0 a 100 para definir el nivel de importancia que considera para cada criterio. Con base en estos valores, el sistema calcula automáticamente el verdadero peso ponderado real (normalizado al 100%) que se aplica en las evaluaciones. <br><br>
+                Si desea volver a los parámetros originales, haga clic en el botón inferior para restaurar instantáneamente los valores predeterminados de Excel en las barras y en el gráfico circular.
             </p>
         </div>
         """,
@@ -435,7 +454,7 @@ else:
         " altamente distinguibles:"
     )
 
-    # Generar gráfico circular (Dona) con Plotly utilizando una paleta variada y corporativa (Rojo, Azul, Verde, Morado, Naranja, Cian, Rosa)
+    # Generar gráfico circular (Dona) con Plotly utilizando la paleta variada corporativa
     df_chart = pd.DataFrame({
         "Criterio": list(pesos_normalizados.keys()),
         "Porcentaje Real (%)": [v * 100 for v in pesos_normalizados.values()],
