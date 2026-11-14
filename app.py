@@ -49,7 +49,7 @@ try:
 except:
   pass
 
-# Estilos CSS con la corrección definitiva de opacidad y color para los inputs de fecha
+# Estilos CSS con corrección de etiquetas en formularios (texto negro sobre fondo blanco)
 st.markdown(
     f"""
     <style>
@@ -62,14 +62,24 @@ st.markdown(
     
     {background_css}
     
-    /* Forzar colores de texto generales en blanco para máxima visibilidad */
+    /* Forzar colores de texto generales en blanco para el panel principal fuera de formularios */
     .stMarkdown, p, span, label, h1, h2, h3, h4, 
     .stRadio label, .stCheckbox label, .stSelectbox label, 
     .stNumberInput label, .stTextInput label, .stDateInput label, .stSlider label {{
         color: #FFFFFF !important;
     }}
     
-    /* CORRECCIÓN DEFINITIVA PARA LA FECHA: Texto blanco puro y opacidad 100% en todos sus segmentos */
+    /* CORRECCIÓN PARA ETIQUETAS Y TEXTOS DENTRO DEL FORMULARIO DE BRIEF (Fondo blanco -> Letra negra) */
+    [data-testid="stForm"] label, 
+    [data-testid="stForm"] p, 
+    [data-testid="stForm"] span, 
+    [data-testid="stForm"] [data-testid="stWidgetLabel"],
+    [data-testid="stForm"] [data-testid="stDateInput"] label {{
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+    }}
+    
+    /* Fecha seleccionada (dentro de la caja) en blanco sobre fondo oscuro */
     [data-testid="stDateInput"] input, 
     [data-testid="stDateInput"] div, 
     [data-testid="stDateInput"] span {{
@@ -107,10 +117,6 @@ st.markdown(
         border-top: 6px solid #F40009 !important;
         max-width: 420px;
         margin: 0 auto;
-    }}
-    
-    [data-testid="stForm"] label, [data-testid="stForm"] p, [data-testid="stForm"] span {{
-        color: #333333 !important;
     }}
     
     .badge-femsa {{
@@ -618,9 +624,9 @@ else:
     )
     st.markdown("---")
 
-    # Formulario del Brief
+    # Formulario del Brief (Sin el texto de ServiceNow en el título)
     with st.form("form_brief_mgip"):
-      st.markdown("### 📝 Captura de Brief (Estándar ServiceNow MGIP)")
+      st.markdown("### 📝 Captura de Brief MGIP")
 
       col_a, col_b = st.columns(2)
       with col_a:
