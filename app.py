@@ -217,19 +217,22 @@ if "lista_proyectos" not in st.session_state:
 if "menu_actual" not in st.session_state:
   st.session_state.menu_actual = "🏠 Inicio / Resumen"
 
-# Pesos AHP predeterminados (calculados originalmente en Excel)
-PESOS_EXCEL_DEFAULT = {
-    "Seguridad y cumplimiento normativo": 0.3197,
-    "Rentabilidad y optimización de recursos": 0.2053,
-    "Continuidad operativa y salud de activos": 0.1894,
-    "Alineación estratégica y LRP": 0.1399,
-    "Gestión de riesgos técnicos y operacionales": 0.0872,
-    "Complejidad y desafíos de ejecución técnica": 0.0383,
-    "Impacto en el servicio y desarrollo humano": 0.0202,
+# Valores predeterminados (escala 0-100 basados en los pesos originales de Excel)
+VALORES_EXCEL_DEFAULT = {
+    "Seguridad y cumplimiento normativo": 31.97,
+    "Rentabilidad y optimización de recursos": 20.53,
+    "Continuidad operativa y salud de activos": 18.94,
+    "Alineación estratégica y LRP": 13.99,
+    "Gestión de riesgos técnicos y operacionales": 8.72,
+    "Complejidad y desafíos de ejecución técnica": 3.83,
+    "Impacto en el servicio y desarrollo humano": 2.02,
 }
 
-if "pesos_ahp" not in st.session_state:
-  st.session_state.pesos_ahp = PESOS_EXCEL_DEFAULT.copy()
+# Inicializar los valores de los sliders en session_state si no existen
+for key, default_val in VALORES_EXCEL_DEFAULT.items():
+  session_key = f"slider_{key}"
+  if session_key not in st.session_state:
+    st.session_state[session_key] = default_val
 
 # Lista oficial de los 20 lugares de la planta
 LUGARES_PLANTA = [
@@ -376,71 +379,71 @@ else:
       st.metric(label="Estado del Sistema", value="Activo")
 
   # ------------------------------------------
-  # CONFIGURACIÓN AHP (INTERFAZ VISUAL + NORMALIZACIÓN A DONUT CHART)
+  # CONFIGURACIÓN AHP (BARRAS 0-100 + BOTÓN PREDETERMINADO + DONUT CHART)
   # ------------------------------------------
   elif menu == "⚙️ Configuración AHP":
     st.markdown(
         """
         <div class="dashboard-card">
-            <h2>⚙️ Configuración Visual y Ponderación de Criterios AHP</h2>
-            <p style="margin-top: 0.8rem; color: #CCCCCC; line-height: 1.5;">
-                <b>Instrucciones para el usuario:</b> Ajuste las barras deslizantes según el peso ponderado y la importancia relativa que le quiera dar a cada criterio corporativo. No necesita preocuparse por calcular porcentajes exactos; el sistema normalizará automáticamente los valores de forma visual. El diagrama circular inferior reflejará en tiempo real los porcentajes reales resultantes que suman el 100%. <br><br>
-                Si lo prefiere, puede hacer clic en el botón de abajo para restaurar de inmediato los valores predeterminados calculados previamente en Excel.
+            <h2>⚙️ Configuración y Ponderación de Criterios AHP</h2>
+            <p style="margin-top: 0.8rem; color: #CCCCCC; line-height: 1.6;">
+                <b>Instrucciones:</b> Deslice las barras corporativas para definir el nivel de importancia que considera para cada criterio en una escala de 0 a 100. Con base en estos valores, el sistema calculará automáticamente el peso ponderado real (normalizado al 100%) que se aplicará en las evaluaciones de los proyectos. <br><br>
+                Si desea volver a los parámetros originales, haga clic en el botón inferior para restaurar instantáneamente los valores predeterminados de Excel.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Botón Predeterminado (Excel)
+    # Botón para cargar los valores predeterminados de Excel y actualizar todo automáticamente
     if st.button("🔄 Cargar Valores Predeterminados (Excel)"):
-      st.session_state.pesos_ahp = PESOS_EXCEL_DEFAULT.copy()
+      for key, default_val in VALORES_EXCEL_DEFAULT.items():
+        st.session_state[f"slider_{key}"] = default_val
       st.success(
-          "¡Se han restaurado con éxito los porcentajes predeterminados"
-          " calculados en Excel!"
+          "¡Valores predeterminados de Excel restaurados con éxito en las"
+          " barras y el gráfico circular!"
       )
       st.rerun()
 
-    st.markdown("### 🎚️ Ajuste Visual de Criterios (Peso Relativo)")
+    st.markdown("### 🎚️ Nivel de Importancia por Criterio (0 a 100)")
 
-    criterios = list(st.session_state.pesos_ahp.keys())
-    raw_values = {}
-
-    # Sliders visuales limpios sin porcentajes molestos en los títulos
-    for crit in criterios:
-      val_actual = float(st.session_state.pesos_ahp[crit] * 100)
-      raw_values[crit] = st.slider(
-          f"{crit}", 0.0, 100.0, val_actual, 1.0, key=f"sl_{crit}"
+    # Capturar los valores actuales de las barras desde st.session_state
+    raw_scores = {}
+    for crit in VALORES_EXCEL_DEFAULT.keys():
+      session_key = f"slider_{crit}"
+      raw_scores[crit] = st.slider(
+          f"{crit}", 0.0, 100.0, float(st.session_state[session_key]), 1.0, key=session_key
       )
 
-    # Normalización automática para que la suma total sea exactamente 100% de cara a los cálculos
-    suma_raw = sum(raw_values.values())
-    if suma_raw > 0:
-      pesos_normalizados = {k: v / suma_raw for k, v in raw_values.items()}
+    # Cálculo automático de los pesos normalizados (verdadero peso ponderado AHP que suma 100%)
+    suma_total = sum(raw_scores.values())
+    if suma_total > 0:
+      pesos_normalizados = {k: v / suma_total for k, v in raw_scores.items()}
     else:
       pesos_normalizados = {
-          k: 1.0 / len(criterios) for k in raw_values.keys()
+          k: 1.0 / len(VALORES_EXCEL_DEFAULT) for k in raw_scores.keys()
       }
 
+    # Guardar en st.session_state para que la app lo use en las evaluaciones
     st.session_state.pesos_ahp = pesos_normalizados
 
     st.markdown("---")
-    st.markdown("### 📊 Resultado en el Diagrama Circular (Suma 100%)")
+    st.markdown("### 📊 Gráfico Circular: Verdadero Peso Ponderado (Suma 100%)")
     st.markdown(
-        "Visualización en tiempo real de la distribución porcentual resultante"
-        " tras sus ajustes:"
+        "El siguiente diagrama refleja en tiempo real la distribución"
+        " porcentual calculada a partir de sus ajustes:"
     )
 
-    # Crear gráfico circular con Plotly (Dona corporativa)
+    # Generar gráfico circular (Dona) con Plotly
     df_chart = pd.DataFrame({
         "Criterio": list(pesos_normalizados.keys()),
-        "Porcentaje": [v * 100 for v in pesos_normalizados.values()],
+        "Porcentaje Real (%)": [v * 100 for v in pesos_normalizados.values()],
     })
 
     fig = px.pie(
         df_chart,
         names="Criterio",
-        values="Porcentaje",
+        values="Porcentaje Real (%)",
         hole=0.4,
         color_discrete_sequence=px.colors.sequential.Reds_r,
     )
@@ -580,6 +583,13 @@ else:
           " (se aplicarán automáticamente los pesos vigentes configurados en"
           " la sección AHP):"
       )
+
+      # Asegurar que existan los pesos AHP en session_state
+      if "pesos_ahp" not in st.session_state:
+        suma_def = sum(VALORES_EXCEL_DEFAULT.values())
+        st.session_state.pesos_ahp = {
+            k: v / suma_def for k, v in VALORES_EXCEL_DEFAULT.items()
+        }
 
       criterios_keys = list(st.session_state.pesos_ahp.keys())
 
