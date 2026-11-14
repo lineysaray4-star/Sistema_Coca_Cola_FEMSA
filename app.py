@@ -69,10 +69,14 @@ st.markdown(
         color: #FFFFFF !important;
     }}
     
-    /* CORRECCIÓN: Forzar texto blanco en campos de entrada, fecha y números */
-    input, textarea, select, [data-baseweb="input"] input, [data-baseweb="base-input"] input {{
+    /* CORRECCIÓN TOTAL: Forzar texto blanco en campos de entrada, fecha y números */
+    input, textarea, select, [data-baseweb="input"] input, [data-baseweb="base-input"] input, [data-testid="stDateInput"] input {{
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
+    }}
+    
+    [data-baseweb="input"], [data-baseweb="base-input"], [data-testid="stDateInput"] div {{
+        color: #FFFFFF !important;
     }}
     
     /* Estilizar el formulario nativo de login */
