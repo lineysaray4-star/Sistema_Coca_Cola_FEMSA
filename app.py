@@ -49,7 +49,7 @@ try:
 except:
   pass
 
-# Estilos CSS robustos para el modo oscuro, visibilidad total de textos y barras gruesas
+# Estilos CSS robustos para visibilidad total, textos blancos y corrección de inputs de fecha
 st.markdown(
     f"""
     <style>
@@ -67,6 +67,12 @@ st.markdown(
     .stRadio label, .stCheckbox label, .stSelectbox label, 
     .stNumberInput label, .stTextInput label, .stDateInput label, .stSlider label {{
         color: #FFFFFF !important;
+    }}
+    
+    /* CORRECCIÓN: Forzar texto blanco en campos de entrada, fecha y números */
+    input, textarea, select, [data-baseweb="input"] input, [data-baseweb="base-input"] input {{
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
     }}
     
     /* Estilizar el formulario nativo de login */
